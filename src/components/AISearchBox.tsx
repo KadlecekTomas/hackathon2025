@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Loader2, Search, Sparkles } from "lucide-react";
+import { Loader2, Mic, Search, Sparkles } from "lucide-react";
 import type { AIFeature } from "@/utils/aiUtils";
 
 type AISearchBoxProps = {
@@ -148,11 +148,19 @@ export function AISearchBox({ onSearch, onSelect }: AISearchBoxProps) {
         </div>
         <button
           type="button"
+          onClick={handleVoiceSearch}
+          className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition hover:bg-slate-100 cursor-pointer"
+          aria-label="Hlasove vyhledavani"
+        >
+          <Mic size={18} />
+        </button>
+        <button
+          type="button"
           onClick={() => {
             playPing();
             void handleSearch();
           }}
-          className="inline-flex items-center gap-2 rounded-2xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-emerald-950 shadow-lg shadow-emerald-500/40 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-emerald-900/40 disabled:text-emerald-100"
+          className="inline-flex items-center gap-2 rounded-2xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-emerald-950 shadow-lg shadow-emerald-500/40 transition hover:bg-emerald-400 cursor-pointer disabled:cursor-not-allowed disabled:bg-emerald-900/40 disabled:text-emerald-100"
           disabled={isThinking}
         >
           {isThinking ? (
@@ -182,7 +190,7 @@ export function AISearchBox({ onSearch, onSelect }: AISearchBoxProps) {
                 key={item.id}
                 type="button"
                 onClick={() => onSelect(item)}
-                className="flex w-full flex-col gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left text-sm text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-400/60"
+                className="flex w-full flex-col gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left text-sm text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-400/60 cursor-pointer"
               >
                 <div className="flex items-center justify-between gap-3">
                   <div>
@@ -206,7 +214,7 @@ export function AISearchBox({ onSearch, onSelect }: AISearchBoxProps) {
         ) : null}
       </AnimatePresence>
 
-  {!isThinking && results.length === 0 && (message || hasQuery) ? (
+      {!isThinking && results.length === 0 && (message || hasQuery) ? (
         <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs text-slate-500">
           {message ??
             'Zadejte dotaz a potvrzte jej enterem nebo tlacitkem "Vyhledat".'}
