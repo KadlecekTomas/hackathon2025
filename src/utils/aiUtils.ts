@@ -291,7 +291,7 @@ export function pickDistinct(
 }
 
 export function buildPlanNarrative(plan: AIFeature[]): string[] {
-  const slots = ["9:00 —", "12:30 —", "15:00 —"];
+  const slots = ["", "", ""];
   return plan.slice(0, 3).map((item, index) => {
     const summary = buildFriendlySummary(item);
     return `${slots[index] ?? ""} ${item.title} · ${summary}`;
