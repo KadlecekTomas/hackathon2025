@@ -20,23 +20,13 @@ const PLAN_ORDER: Array<{
   emoji: string;
   filter: (item: AIFeature) => boolean;
 }> = [
-  {
-    label: "Dopoledne",
-    emoji: "🏛️",
-    filter: (item) => item.layerId.includes("pamatky"),
-  },
+  { label: "Dopoledne", emoji: "☀️", filter: (item) => item.layerId.includes("pamatky") },
   {
     label: "Odpoledne",
-    emoji: "🌿",
-    filter: (item) =>
-      item.layerId === "prirodni-zajimavosti" ||
-      item.typeLabel.toLowerCase().includes("prirodni"),
+    emoji: "🌳",
+    filter: (item) => item.layerId === "prirodni-zajimavosti" || item.typeLabel.toLowerCase().includes("prirodni"),
   },
-  {
-    label: "Vecer",
-    emoji: "🌆",
-    filter: (item) => item.layerId === "turisticke-regiony",
-  },
+  { label: "Vecer", emoji: "🗺️", filter: (item) => item.layerId === "turisticke-regiony" },
 ];
 
 export function AIPlanner({ features, onSelect }: PlannerProps) {
@@ -94,7 +84,7 @@ export function AIPlanner({ features, onSelect }: PlannerProps) {
             exit={{ opacity: 0, y: -8 }}
             className="rounded-2xl border border-emerald-200/60 bg-white/95 px-4 py-3 text-sm text-emerald-700"
           >
-            Kliknete na "Generovat plan" a AI sestavi vylet na cely den.
+            Kliknete na &quot;Generovat plan&quot; a AI sestavi vylet na cely den.
           </motion.div>
         ) : (
           <motion.div
@@ -105,15 +95,12 @@ export function AIPlanner({ features, onSelect }: PlannerProps) {
             transition={{ duration: 0.25 }}
             className="space-y-3 rounded-2xl border border-emerald-200/60 bg-white p-4 text-sm leading-relaxed text-slate-700 shadow-inner shadow-emerald-100"
           >
-            <p className="text-sm font-semibold text-emerald-600">
-              📅 Tvuj plan:
-            </p>
+            <p className="text-sm font-semibold text-emerald-600">Tvuj plan:</p>
             <ul className="space-y-2">
               {PLAN_ORDER.map((slot, index) => {
                 const item = plan[index];
                 if (!item) return null;
-                const summary =
-                  planNarrative[index] ?? buildFriendlySummary(item);
+                const summary = planNarrative[index] ?? buildFriendlySummary(item);
                 return (
                   <li
                     key={`${slot.label}-${item.id}`}
@@ -142,3 +129,4 @@ export function AIPlanner({ features, onSelect }: PlannerProps) {
     </section>
   );
 }
+

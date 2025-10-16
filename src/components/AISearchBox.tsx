@@ -53,12 +53,26 @@ export function AISearchBox({ onSearch, onSelect }: AISearchBoxProps) {
 
   const handleVoiceSearch = () => {
     if (typeof window === "undefined") return;
-    const win = window as Window & {
-      SpeechRecognition?: typeof window.SpeechRecognition;
-      webkitSpeechRecognition?: typeof window.SpeechRecognition;
+    type SRResult = { transcript: string };
+    type SRResults = { [index: number]: { [index: number]: SRResult } };
+    type SpeechRecognitionEventLike = { results: SRResults };
+    type SpeechRecognitionLike = {
+      lang: string;
+      interimResults: boolean;
+      maxAlternatives: number;
+      onstart: (() => void) | null;
+      onresult: ((event: SpeechRecognitionEventLike) => void) | null;
+      onerror: ((event: unknown) => void) | null;
+      onend: (() => void) | null;
+      start: () => void;
+    };
+    type SpeechRecognitionConstructor = new () => SpeechRecognitionLike;
+    const srGlobal = window as unknown as {
+      SpeechRecognition?: SpeechRecognitionConstructor;
+      webkitSpeechRecognition?: SpeechRecognitionConstructor;
     };
     const SpeechRecognitionClass =
-      win.SpeechRecognition ?? win.webkitSpeechRecognition;
+      srGlobal.SpeechRecognition ?? srGlobal.webkitSpeechRecognition;
     if (!SpeechRecognitionClass) {
       setMessage("Prohlizec nepodporuje hlasove vyhledavani.");
       return;
@@ -73,7 +87,7 @@ export function AISearchBox({ onSearch, onSelect }: AISearchBoxProps) {
       setMessage(null);
     };
 
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
+    recognition.onresult = (event: SpeechRecognitionEventLike) => {
       const transcript = event.results[0][0].transcript;
       setQuery(transcript);
       void onSearch(transcript).then((found) => {
