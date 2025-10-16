@@ -15,6 +15,7 @@ import L, {
   type GeoJSON as LeafletGeoJson,
   type LatLngExpression,
   type Map as LeafletMap,
+  type Polyline,
 } from "leaflet";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { LucideIcon } from "lucide-react";
@@ -343,36 +344,90 @@ export function MapView({
                 const typed = feature as Feature;
                 const featureId = getFeatureId(typed);
                 const compoundId = `${layer.id}:${featureId}`;
+                let interactionBuffer: Polyline | null = null;
+
+                const handleClick = () => {
+                  onSelectFeature(layer.id, typed);
+                };
+
+                const handleMouseOver = () => {
+                  setHovered(compoundId);
+                  if (
+                    (leafletLayer as LeafletGeoJson).setStyle &&
+                    layer.geometry !== "point"
+                  ) {
+                    (leafletLayer as LeafletGeoJson).setStyle({
+                      weight: (layer.style?.weight ?? 2) + 1.5,
+                      opacity: 1,
+                    });
+                  }
+                };
+
+                const handleMouseOut = () => {
+                  setHovered((prev) => (prev === compoundId ? null : prev));
+                  if (
+                    (leafletLayer as LeafletGeoJson).setStyle &&
+                    layer.geometry !== "point"
+                  ) {
+                    (leafletLayer as LeafletGeoJson).setStyle({
+                      weight: layer.style?.weight ?? 2,
+                      opacity: 0.85,
+                    });
+                  }
+                };
 
                 leafletLayer.on({
-                  click: () => {
-                    onSelectFeature(layer.id, typed);
-                  },
-                  mouseover: () => {
-                    setHovered(compoundId);
-                    if (
-                      (leafletLayer as LeafletGeoJson).setStyle &&
-                      layer.geometry !== "point"
-                    ) {
-                      (leafletLayer as LeafletGeoJson).setStyle({
-                        weight: (layer.style?.weight ?? 2) + 1.5,
-                        opacity: 1,
-                      });
-                    }
-                  },
-                  mouseout: () => {
-                    setHovered((prev) => (prev === compoundId ? null : prev));
-                    if (
-                      (leafletLayer as LeafletGeoJson).setStyle &&
-                      layer.geometry !== "point"
-                    ) {
-                      (leafletLayer as LeafletGeoJson).setStyle({
-                        weight: layer.style?.weight ?? 2,
-                        opacity: 0.85,
-                      });
-                    }
-                  },
+                  click: handleClick,
+                  mouseover: handleMouseOver,
+                  mouseout: handleMouseOut,
                 });
+
+                const detachInteractionBuffer = () => {
+                  if (interactionBuffer) {
+                    interactionBuffer.remove();
+                    interactionBuffer = null;
+                  }
+                };
+
+                if (layer.geometry === "line") {
+                  const attachInteractionBuffer = () => {
+                    const mapInstance = (leafletLayer as LeafletGeoJson)._map;
+                    if (!mapInstance) return;
+                    const polylineLayer = leafletLayer as Polyline;
+                    const latLngs = polylineLayer.getLatLngs() as
+                      | LatLngExpression[]
+                      | LatLngExpression[][];
+                    if (!latLngs || latLngs.length === 0) return;
+
+                    detachInteractionBuffer();
+
+                    interactionBuffer = L.polyline(latLngs, {
+                      color: layer.color,
+                      weight: (layer.style?.weight ?? 2) + 14,
+                      opacity: 0.001,
+                      interactive: true,
+                      dashArray: undefined,
+                      bubblingMouseEvents: true,
+                      pane: polylineLayer.options.pane,
+                      smoothFactor: polylineLayer.options.smoothFactor,
+                    }).addTo(mapInstance);
+
+                    interactionBuffer.on({
+                      click: handleClick,
+                      mouseover: handleMouseOver,
+                      mouseout: handleMouseOut,
+                    });
+                  };
+
+                  leafletLayer.on("add", attachInteractionBuffer);
+                  leafletLayer.on("remove", detachInteractionBuffer);
+
+                  if ((leafletLayer as LeafletGeoJson)._map) {
+                    attachInteractionBuffer();
+                  }
+                } else {
+                  leafletLayer.on("remove", detachInteractionBuffer);
+                }
 
                 leafletLayer.bindPopup(
                   getPopupContent(layer, typed, compoundId),
@@ -448,4 +503,3 @@ export function MapView({
     </div>
   );
 }
-
