@@ -8,6 +8,7 @@ import {
   buildFriendlySummary,
   buildPlanNarrative,
   pickDistinct,
+  pickRandom,
 } from "@/utils/aiUtils";
 
 type PlannerProps = {
@@ -38,12 +39,45 @@ export function AIPlanner({ features, onSelect }: PlannerProps) {
   const generatePlan = () => {
     setIsPlanning(true);
     setTimeout(() => {
+      const availableCount = Math.min(3, features.length);
+      if (availableCount === 0) {
+        setPlan([]);
+        setIsPlanning(false);
+        return;
+      }
+
       const picks: AIFeature[] = [];
+      const usedIds = new Set<string>();
+
+      const pushCandidate = (candidate: AIFeature | null) => {
+        if (!candidate) return false;
+        if (usedIds.has(candidate.id)) return false;
+        picks.push(candidate);
+        usedIds.add(candidate.id);
+        return true;
+      };
+
       PLAN_ORDER.forEach(({ filter }) => {
-        const match = pickDistinct(features, filter);
-        if (match) picks.push(match);
+        if (picks.length >= availableCount) return;
+        const match = pickDistinct(
+          features,
+          (item) => filter(item) && !usedIds.has(item.id),
+        );
+        pushCandidate(match);
       });
-      setPlan(picks);
+
+      const remainingPool = features.filter((item) => !usedIds.has(item.id));
+      while (picks.length < availableCount && remainingPool.length > 0) {
+        const next = pickRandom(remainingPool);
+        if (!next) break;
+        pushCandidate(next);
+        const index = remainingPool.findIndex((item) => item.id === next.id);
+        if (index >= 0) {
+          remainingPool.splice(index, 1);
+        }
+      }
+
+      setPlan(picks.slice(0, availableCount));
       setIsPlanning(false);
     }, 700);
   };
@@ -129,4 +163,3 @@ export function AIPlanner({ features, onSelect }: PlannerProps) {
     </section>
   );
 }
-
