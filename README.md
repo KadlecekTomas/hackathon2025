@@ -1,4 +1,4 @@
-# 🚴‍♂️ KHK Explore - Interaktivní mapa Královéhradeckého kraje
+# 🚴‍♂️ ObjevKraj.cz - Interaktivní mapa Královéhradeckého kraje
 
 > **Chytrá aplikace pro plánování cyklovýletů a objevování krás Královéhradeckého kraje s pokročilými AI funkcemi**
 
