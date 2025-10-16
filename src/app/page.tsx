@@ -46,6 +46,8 @@ import {
   mapFeatureToAIFeature,
   type AIFeature,
   buildFriendlySummary,
+  normalizeForSearch,
+  SEARCH_STOP_WORDS,
 } from "@/utils/aiUtils";
 
 type SelectedState =
@@ -54,6 +56,111 @@ type SelectedState =
       featureId: string;
     }
   | null;
+
+type NormalizedLocation = {
+  raw: string;
+  normalized: string;
+};
+
+type QueryContext = {
+  cleanedQuery: string;
+  matchedDistrict: string | null;
+  matchedRegion: string | null;
+};
+
+const LOCATION_PREPOSITIONS = new Set([
+  "u",
+  "v",
+  "ve",
+  "na",
+  "do",
+  "okolo",
+  "okoli",
+  "kolem",
+  "blizko",
+  "blizkosti",
+]);
+
+function buildNormalizedLocations(items: string[]): NormalizedLocation[] {
+  return items
+    .map((raw) => ({
+      raw,
+      normalized: normalizeForSearch(raw),
+    }))
+    .filter((item) => item.normalized.length > 0)
+    .sort((a, b) => b.normalized.length - a.normalized.length);
+}
+
+function filterOutLocationWords(
+  words: string[],
+  location: NormalizedLocation | null,
+): string[] {
+  if (!location) return words;
+  const targetTokens = location.normalized
+    .split(" ")
+    .map((token) => token.trim())
+    .filter((token) => token.length > 0);
+  return words.filter((word) => {
+    const normalized = normalizeForSearch(word);
+    if (normalized.length === 0) return false;
+    if (LOCATION_PREPOSITIONS.has(normalized)) return false;
+    const matchesLocation = targetTokens.some((token) => {
+      if (token === normalized) return true;
+      const lengthDiff = Math.abs(token.length - normalized.length);
+      if (lengthDiff <= 1 && token.startsWith(normalized)) {
+        return true;
+      }
+      if (lengthDiff <= 1 && normalized.startsWith(token)) {
+        return true;
+      }
+      return false;
+    });
+    if (matchesLocation) return false;
+    return true;
+  });
+}
+
+function removeStopWords(words: string[]): string[] {
+  return words.filter((word) => {
+    const normalized = normalizeForSearch(word);
+    return normalized.length > 0 && !SEARCH_STOP_WORDS.has(normalized);
+  });
+}
+
+function extractQueryContext(
+  rawQuery: string,
+  districts: NormalizedLocation[],
+  regions: NormalizedLocation[],
+): QueryContext {
+  const normalizedQuery = normalizeForSearch(rawQuery);
+  const matchedDistrict =
+    districts.find((entry) => normalizedQuery.includes(entry.normalized)) ??
+    null;
+  const matchedRegion =
+    regions.find((entry) => normalizedQuery.includes(entry.normalized)) ?? null;
+
+  const words = rawQuery
+    .split(/\s+/)
+    .map((word) => word.trim())
+    .filter((word) => word.length > 0);
+
+  let filteredWords = filterOutLocationWords(words, matchedDistrict);
+  filteredWords = filterOutLocationWords(filteredWords, matchedRegion);
+
+  const withoutStops = removeStopWords(filteredWords);
+  const cleanedCandidates =
+    withoutStops.length > 0 ? withoutStops : filteredWords;
+  const cleanedQuery =
+    cleanedCandidates.length > 0
+      ? cleanedCandidates.join(" ")
+      : rawQuery.trim();
+
+  return {
+    cleanedQuery: cleanedQuery.trim(),
+    matchedDistrict: matchedDistrict?.raw ?? null,
+    matchedRegion: matchedRegion?.raw ?? null,
+  };
+}
 
 const MapView = dynamic<MapViewProps>(
   () => import("@/components/MapView").then((mod) => mod.MapView),
@@ -82,6 +189,16 @@ function PageInner() {
     availableRegions,
     getFeatureByLayerAndId,
   } = useGeoData();
+
+  const normalizedDistricts = useMemo(
+    () => buildNormalizedLocations(availableDistricts),
+    [availableDistricts],
+  );
+
+  const normalizedRegions = useMemo(
+    () => buildNormalizedLocations(availableRegions),
+    [availableRegions],
+  );
 
   const {
     activeLayerSet,
@@ -417,30 +534,89 @@ function PageInner() {
 
   const handleAISearchQuery = useCallback(
     async (query: string) => {
-      if (!query.trim()) {
+      const trimmed = query.trim();
+      if (!trimmed) {
         setAiSearchResults([]);
         setAiMessage("Napište, co vás zajímá, a AI doporučí výlet.");
         return [];
       }
+
+      const context = extractQueryContext(
+        trimmed,
+        normalizedDistricts,
+        normalizedRegions,
+      );
+      const searchQuery =
+        context.cleanedQuery.length > 0 ? context.cleanedQuery : trimmed;
+
       setAiLoading(true);
-      const results = aiSearch(query.trim());
+      const results = aiSearch(searchQuery);
       await new Promise((resolve) => setTimeout(resolve, 320));
-      setAiSearchResults(results);
-      if (results.length === 0) {
+
+      const normalizedDistrict = context.matchedDistrict
+        ? normalizeForSearch(context.matchedDistrict)
+        : null;
+      const normalizedRegion = context.matchedRegion
+        ? normalizeForSearch(context.matchedRegion)
+        : null;
+
+      let filteredResults = results;
+      if (normalizedDistrict || normalizedRegion) {
+        filteredResults = results.filter((item) => {
+          const itemDistrict = item.district
+            ? normalizeForSearch(item.district)
+            : "";
+          const itemRegion = item.region
+            ? normalizeForSearch(item.region)
+            : "";
+          const districtMatch =
+            !normalizedDistrict ||
+            (itemDistrict && itemDistrict.includes(normalizedDistrict));
+          const regionMatch =
+            !normalizedRegion ||
+            (itemRegion && itemRegion.includes(normalizedRegion));
+          return districtMatch && regionMatch;
+        });
+        if (filteredResults.length === 0) {
+          filteredResults = results;
+        }
+      }
+
+      const limitedResults = filteredResults.slice(0, 3);
+      setAiSearchResults(limitedResults);
+
+      const locationParts: string[] = [];
+      if (context.matchedDistrict) {
+        locationParts.push(`okres ${context.matchedDistrict}`);
+      }
+      if (context.matchedRegion) {
+        locationParts.push(context.matchedRegion);
+      }
+
+      if (limitedResults.length === 0) {
         setAiMessage(
-          "Bohužel jsem v této oblasti nenašel odpovídající výlet. Zkuste jinou oblast.",
+          locationParts.length > 0
+            ? `Bohužel jsem pro ${locationParts.join(
+                " a ",
+              )} nenašla odpovídající výlet. Zkuste dotaz upravit nebo zvolit jinou oblast.`
+            : "Bohužel jsem nenašla odpovídající výlet. Zkuste zadání upřesnit.",
         );
       } else {
-        setAiMessage("Našla jsem tipy, které by se vám mohly líbit.");
+        setAiMessage(
+          locationParts.length > 0
+            ? `Tipy připravené pro ${locationParts.join(" a ")}.`
+            : "Našla jsem tipy, které by se vám mohly líbit.",
+        );
         if (typeof window !== "undefined" && window.innerWidth < 1024) {
           setMobilePanelOpen(true);
           setMobilePanelTab("ai");
         }
       }
+
       setAiLoading(false);
-      return results;
+      return limitedResults;
     },
-    [aiSearch],
+    [aiSearch, normalizedDistricts, normalizedRegions],
   );
 
   const handleAISuggestionSelect = useCallback(
@@ -834,4 +1010,3 @@ export default function Home() {
     </Suspense>
   );
 }
-

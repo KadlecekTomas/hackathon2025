@@ -186,9 +186,11 @@ export function AISearchBox({ onSearch, onSelect }: AISearchBoxProps) {
             className="space-y-2"
           >
             {results.map((item) => (
-              <div
+              <button
                 key={item.id}
-                className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50"
+                type="button"
+                onClick={() => onSelect(item)}
+                className="flex w-full flex-col gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left text-sm text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-400/60"
               >
                 <div className="flex items-center justify-between gap-3">
                   <div>
@@ -199,16 +201,14 @@ export function AISearchBox({ onSearch, onSelect }: AISearchBoxProps) {
                       {item.typeLabel}
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => onSelect(item)}
-                    className="rounded-full border border-emerald-500 px-3 py-1 text-xs font-semibold text-emerald-600 transition hover:bg-emerald-500 hover:text-emerald-950"
-                  >
-                    Zobrazit na mape
-                  </button>
                 </div>
                 <p className="text-xs text-slate-500">{item.description}</p>
-              </div>
+                <div className="flex gap-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                  {item.district ? <span>Okres {item.district}</span> : null}
+                  {item.region ? <span>{item.region}</span> : null}
+                  <span>{item.layerTitle}</span>
+                </div>
+              </button>
             ))}
           </motion.div>
         ) : null}
