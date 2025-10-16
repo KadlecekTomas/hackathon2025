@@ -1,0 +1,51 @@
+{
+  "type": "FeatureCollection",
+  "name": "SampleCyklotrasyKHK",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "OBJECTID": 10001,
+        "NAZEV": "Labská stezka – Hradec Králové",
+        "POPIS": "Úsek populární Labské stezky spojující centrum Hradce Králové se Smiřicemi. Plochá trasa vhodná pro rodiny s dětmi.",
+        "DELKA_KM": 12.4,
+        "OBEC": "Hradec Králové",
+        "KRAJ": "Královéhradecký kraj",
+        "WEB": "https://www.labskastezka.cz/"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [15.8316, 50.2263],
+          [15.8469, 50.2522],
+          [15.8721, 50.2715],
+          [15.9028, 50.2931]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "OBJECTID": 10002,
+        "NAZEV": "Okruh okolo Žďáru",
+        "POPIS": "Středně náročný okruh kopírující Hradecko – vhodný pro zdatnější cyklisty s krásnými výhledy na Orlické hory.",
+        "DELKA_KM": 32.8,
+        "OBEC": "Žďár nad Orlicí",
+        "KRAJ": "Královéhradecký kraj",
+        "WEB": "https://www.hkregion.cz/cyklovylety"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [16.0627, 50.1484],
+          [16.0282, 50.1452],
+          [15.9989, 50.1347],
+          [16.0156, 50.1167],
+          [16.0542, 50.1188],
+          [16.0745, 50.1332],
+          [16.0627, 50.1484]
+        ]
+      }
+    }
+  ]
+}

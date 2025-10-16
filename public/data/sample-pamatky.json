@@ -1,0 +1,38 @@
+{
+  "type": "FeatureCollection",
+  "name": "SamplePamatkyKHK",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "OBJECTID": 20001,
+        "NAZEV": "Hospital Kuks",
+        "POPIS": "Barokní perla v údolí Labe s muzeem farmacie a sochami M. B. Brauna.",
+        "OBEC": "Kuks",
+        "KRAJ": "Královéhradecký kraj",
+        "WEB": "https://www.hospital-kuks.cz/",
+        "TELEFON": "+420 491 610 111"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [15.9058, 50.4051]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "OBJECTID": 20002,
+        "NAZEV": "Zámek Opočno",
+        "POPIS": "Renesanční zámek s rozsáhlými sbírkami a zámeckým parkem.",
+        "OBEC": "Opočno",
+        "KRAJ": "Královéhradecký kraj",
+        "WEB": "https://www.zamek-opocno.cz/",
+        "TELEFON": "+420 494 668 216"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [16.1147, 50.2706]
+      }
+    }
+  ]
+}
