@@ -39,9 +39,9 @@ const DEFAULT_ZOOM = 9;
 
 type SelectedRef =
   | {
-      layerId: GeoLayerId;
-      featureId: string;
-    }
+    layerId: GeoLayerId;
+    featureId: string;
+  }
   | null;
 
 export type MapViewProps = {
@@ -390,13 +390,12 @@ export function MapView({
                 };
 
                 if (layer.geometry === "line") {
-                  const attachInteractionBuffer = () => {
-                    const mapInstance = (leafletLayer as LeafletGeoJson)._map;
-                    if (!mapInstance) return;
+                  const attachInteractionBuffer = (mapInstance: LeafletMap) => {
                     const polylineLayer = leafletLayer as Polyline;
                     const latLngs = polylineLayer.getLatLngs() as
                       | LatLngExpression[]
                       | LatLngExpression[][];
+
                     if (!latLngs || latLngs.length === 0) return;
 
                     detachInteractionBuffer();
@@ -419,12 +418,16 @@ export function MapView({
                     });
                   };
 
-                  leafletLayer.on("add", attachInteractionBuffer);
-                  leafletLayer.on("remove", detachInteractionBuffer);
+                  // 💎 typově čistý přístup
+                  type LayerWithMap = L.Layer & { _map?: L.Map | null };
 
-                  if ((leafletLayer as LeafletGeoJson)._map) {
-                    attachInteractionBuffer();
-                  }
+                  leafletLayer.on("add", (event) => {
+                    const target = event.target as LayerWithMap;
+                    const mapInstance = target._map;
+                    if (mapInstance) attachInteractionBuffer(mapInstance);
+                  });
+
+                  leafletLayer.on("remove", detachInteractionBuffer);
                 } else {
                   leafletLayer.on("remove", detachInteractionBuffer);
                 }
