@@ -92,7 +92,7 @@ export function AIPlanner({ features, onSelect }: PlannerProps) {
         <button
           type="button"
           onClick={generatePlan}
-          className="inline-flex items-center gap-2 rounded-2xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-emerald-950 shadow-lg shadow-emerald-500/40 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-emerald-900/60 disabled:text-emerald-100"
+          className="inline-flex items-center gap-2 rounded-2xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-emerald-950 shadow-lg shadow-emerald-500/40 transition hover:bg-emerald-400 cursor-pointer disabled:cursor-not-allowed disabled:bg-emerald-900/60 disabled:text-emerald-100"
           disabled={isPlanning}
         >
           {isPlanning ? (
@@ -147,7 +147,7 @@ export function AIPlanner({ features, onSelect }: PlannerProps) {
                       <button
                         type="button"
                         onClick={() => onSelect(item)}
-                        className="rounded-full border border-emerald-500 px-3 py-1 text-xs font-semibold text-emerald-600 transition hover:bg-emerald-500 hover:text-emerald-950"
+                        className="rounded-full border border-emerald-500 px-3 py-1 text-xs font-semibold text-emerald-600 transition hover:bg-emerald-500 hover:text-emerald-950 cursor-pointer"
                       >
                         Zobrazit
                       </button>

@@ -162,21 +162,21 @@ export function DetailPanel({
             <button
               type="button"
               onClick={onShare}
-              className="rounded-2xl border border-slate-200 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-600 transition hover:bg-slate-100"
+              className="rounded-2xl border border-slate-200 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-600 transition hover:bg-slate-100 cursor-pointer"
             >
               <Share2 size={14} className="inline-block" /> Sdilet
             </button>
             <button
               type="button"
               onClick={onExportPdf}
-              className="rounded-2xl border border-slate-200 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-600 transition hover:bg-slate-100"
+              className="rounded-2xl border border-slate-200 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-600 transition hover:bg-slate-100 cursor-pointer"
             >
               <FileDown size={14} className="inline-block" /> Export
             </button>
             <button
               type="button"
               onClick={onToggleFavorite}
-              className={`inline-flex items-center gap-1 rounded-2xl border px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition ${
+              className={`inline-flex items-center gap-1 rounded-2xl border px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition cursor-pointer ${
                 isFavorite
                   ? "border-yellow-400 bg-yellow-100 text-yellow-700"
                   : "border-slate-200 text-slate-600 hover:bg-slate-100"
@@ -285,28 +285,27 @@ export function DetailPanel({
         ) : (
           <ul className="space-y-2">
             {recommendations.map((item) => (
-              <li
-                key={`${item.layerId}:${item.id}`}
-                className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm transition hover:border-emerald-300 hover:bg-emerald-50"
-              >
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">
-                    {item.title}
-                  </p>
-                  <p className="text-xs text-slate-500">
-                    {item.layerTitle}
-                    {item.district ? ` - ${item.district}` : ""}
-                    {typeof item.distanceKm === "number"
-                      ? ` - ${item.distanceKm.toFixed(1)} km`
-                      : ""}
-                  </p>
-                </div>
+              <li key={`${item.layerId}:${item.id}`}>
                 <button
                   type="button"
                   onClick={() => onSelectRecommendation(item.layerId, item.id)}
-                  className="rounded-full border border-emerald-500 px-3 py-1 text-xs font-semibold text-emerald-600 transition hover:bg-emerald-500 hover:text-emerald-950"
+                  className="flex w-full items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-left text-sm transition hover:border-emerald-300 hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-400/60 cursor-pointer"
                 >
-                  Otevrit
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">
+                      {item.title}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      {item.layerTitle}
+                      {item.district ? ` - ${item.district}` : ""}
+                      {typeof item.distanceKm === "number"
+                        ? ` - ${item.distanceKm.toFixed(1)} km`
+                        : ""}
+                    </p>
+                  </div>
+                  <span className="rounded-full border border-emerald-500 px-3 py-1 text-xs font-semibold text-emerald-600 transition">
+                    Otevrit
+                  </span>
                 </button>
               </li>
             ))}
@@ -334,7 +333,7 @@ export function DetailPanel({
           </label>
           <button
             type="submit"
-            className="rounded-2xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-emerald-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-emerald-900/60 disabled:text-emerald-200/60"
+            className="rounded-2xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-emerald-950 transition hover:bg-emerald-400 cursor-pointer disabled:cursor-not-allowed disabled:bg-emerald-900/60 disabled:text-emerald-200/60"
             disabled={nearbyLoading}
           >
             Vyhledat

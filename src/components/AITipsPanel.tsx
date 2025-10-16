@@ -63,7 +63,7 @@ export function AITipsPanel({ tips, onSelect, isLoading = false, message }: AITi
                 <button
                   type="button"
                   onClick={() => onSelect(tip)}
-                  className="flex w-full flex-col gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left text-sm transition hover:border-emerald-300 hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-400/60"
+                  className="flex w-full flex-col gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left text-sm transition hover:border-emerald-300 hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-400/60 cursor-pointer"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div>
