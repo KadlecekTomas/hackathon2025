@@ -49,7 +49,7 @@ type SelectedRef =
     }
   | null;
 
-type MapViewProps = {
+export type MapViewProps = {
   layers: GeoLayerDefinition[];
   data: GeoLayerState;
   loading: LoadingState;
