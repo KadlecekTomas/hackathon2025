@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { jsPDF } from "jspdf";
 import type { Feature } from "geojson";
@@ -57,7 +58,7 @@ const MapView = dynamic<MapViewProps>(
   },
 );
 
-export default function Home() {
+function PageInner() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -86,14 +87,7 @@ export default function Home() {
 
   const [selected, setSelected] = useState<SelectedState>(null);
   const [favorites, setFavorites] = useState<FavoriteFeature[]>([]);
-  const [theme, setTheme] = useState<"dark" | "light">(() => {
-    if (typeof window === "undefined") return "dark";
-    const stored = window.localStorage.getItem("khk-theme");
-    if (stored === "light" || stored === "dark") return stored;
-    return window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light";
-  });
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [userLocation, setUserLocation] = useState<{
     lat: number;
     lng: number;
@@ -116,6 +110,17 @@ export default function Home() {
 
   useEffect(() => {
     setFavorites(loadFavorites());
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = window.localStorage.getItem("khk-theme");
+    if (stored === "light" || stored === "dark") {
+      setTheme(stored);
+      return;
+    }
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    setTheme(prefersDark ? "dark" : "light");
   }, []);
 
   useEffect(() => {
@@ -695,5 +700,13 @@ export default function Home() {
         ) : null}
       </AnimatePresence>
     </main>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={null}>
+      <PageInner />
+    </Suspense>
   );
 }
