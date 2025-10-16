@@ -30,13 +30,17 @@
 
 @layer components {
   .khk-popup {
-    background: rgba(255, 255, 255, 0.96);
+    /**background: rgba(255, 255, 255, 0.96);**/
     border-radius: 1rem;
     border: 1px solid rgba(148, 163, 184, 0.35);
-    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.2);
-    backdrop-filter: blur(16px);
+   /** box-shadow: 0 18px 40px rgba(15, 23, 42, 0.2);
+   /** backdrop-filter: blur(16px);**/
     padding: 1rem;
     color: #0f172a;
+  }
+
+  .khk-popup .leaflet-popup-close-button {
+    display: none;
   }
 
   .khk-popup .leaflet-popup-content-wrapper {
@@ -47,6 +51,34 @@
 
   .khk-popup-content {
     font-family: var(--font-geist-sans), system-ui, sans-serif;
+    position: relative;
+    padding-top: 0.75rem;
+  }
+
+  .khk-popup-close {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(148, 163, 184, 0.4);
+    background: rgba(248, 250, 252, 0.95);
+    color: #334155;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  }
+
+  .khk-popup-close:hover {
+    background: rgba(148, 163, 184, 0.2);
+    color: #0f172a;
+    transform: scale(1.05);
   }
 
   .khk-popup-button {
