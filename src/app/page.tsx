@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { jsPDF } from "jspdf";
 import type { Feature } from "geojson";
@@ -57,7 +58,7 @@ const MapView = dynamic<MapViewProps>(
   },
 );
 
-export default function Home() {
+function PageInner() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -699,5 +700,13 @@ export default function Home() {
         ) : null}
       </AnimatePresence>
     </main>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={null}>
+      <PageInner />
+    </Suspense>
   );
 }
