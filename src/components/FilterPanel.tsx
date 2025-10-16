@@ -76,29 +76,31 @@ export function FilterPanel({
 
           {/* --- Action buttons right --- */}
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onRandomTip();
-              }}
-              className="inline-flex items-center gap-2 rounded-2xl bg-emerald-500 px-3 py-2 text-xs sm:text-sm font-semibold text-emerald-950 transition hover:bg-emerald-400"
-            >
-              <Sparkles size={16} />
-              🎲 Kam dnes?
-            </button>
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-2 sm:mt-0">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRandomTip();
+                }}
+                className="inline-flex items-center gap-2 rounded-2xl bg-emerald-500 px-3 py-2 text-xs sm:text-sm font-semibold text-emerald-950 transition hover:bg-emerald-400 cursor-pointer"
+              >
+                <Sparkles size={16} />
+                🎲 Kam dnes?
+              </button>
 
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onLocate();
-              }}
-              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs sm:text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-            >
-              <LocateIcon size={16} />
-              {locating ? "Zjišťuji pozici…" : "Najít nejbližší tip"}
-            </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onLocate();
+                }}
+                className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs sm:text-sm font-semibold text-slate-700 transition hover:bg-slate-100 cursor-pointer"
+              >
+                <LocateIcon size={16} />
+                {locating ? "Zjišťuji pozici…" : "Najít nejbližší tip"}
+              </button>
+            </div>
 
             <button
               type="button"
@@ -158,11 +160,10 @@ export function FilterPanel({
                 >
                   <p className="text-xs uppercase tracking-wide text-slate-500">{item.label}</p>
                   <p
-                    className={`mt-1 ${
-                      item.isText
+                    className={`mt-1 ${item.isText
                         ? "text-sm font-semibold text-slate-700"
                         : "text-2xl font-bold"
-                    }`}
+                      }`}
                   >
                     {item.value}
                   </p>
