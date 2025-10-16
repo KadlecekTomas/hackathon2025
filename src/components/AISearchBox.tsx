@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Loader2, Mic, Search, Sparkles } from "lucide-react";
+import { Loader2, Search, Sparkles } from "lucide-react";
 import type { AIFeature } from "@/utils/aiUtils";
 
 type AISearchBoxProps = {
@@ -142,18 +142,10 @@ export function AISearchBox({ onSearch, onSelect }: AISearchBoxProps) {
             placeholder={placeholder}
             className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 pr-16 text-sm text-slate-800 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/40"
           />
-          <div className="pointer-events-none absolute inset-y-0 right-12 hidden items-center pr-3 text-slate-400 sm:flex">
+          <div className="pointer-events-none absolute inset-y-0 right-3 hidden items-center pr-3 text-slate-400 sm:flex">
             <Search size={16} />
           </div>
         </div>
-        <button
-          type="button"
-          onClick={handleVoiceSearch}
-          className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition hover:bg-slate-100"
-          aria-label="Hlasove vyhledavani"
-        >
-          <Mic size={18} />
-        </button>
         <button
           type="button"
           onClick={() => {
