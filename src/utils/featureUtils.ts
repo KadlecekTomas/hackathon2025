@@ -118,7 +118,7 @@ export function getFeatureLength(feature: Feature): string | null {
     "Delka",
   ]);
   if (typeof raw === "number") {
-    return `${raw.toFixed(1)} km`;
+    return `${raw} m`;
   }
   if (typeof raw === "string") {
     return raw;

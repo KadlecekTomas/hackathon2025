@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { CalendarRange, Loader2, Sparkles } from "lucide-react";
+import { jsPDF } from "jspdf";
+import { CalendarRange, Loader2, Sparkles, FileDown } from "lucide-react";
 import type { AIFeature } from "@/utils/aiUtils";
 import {
   buildFriendlySummary,
@@ -16,25 +17,45 @@ type PlannerProps = {
   onSelect: (feature: AIFeature) => void;
 };
 
-const PLAN_ORDER: Array<{
-  label: string;
-  emoji: string;
-  filter: (item: AIFeature) => boolean;
-}> = [
-  { label: "Dopoledne", emoji: "☀️", filter: (item) => item.layerId.includes("pamatky") },
+const PLAN_ORDER = [
+  {
+    label: "Dopoledne",
+    emoji: "🟠",
+    filter: (item: AIFeature) => item.layerId.includes("pamatky"),
+  },
   {
     label: "Odpoledne",
-    emoji: "🌳",
-    filter: (item) => item.layerId === "prirodni-zajimavosti" || item.typeLabel.toLowerCase().includes("prirodni"),
+    emoji: "🟢",
+    filter: (item: AIFeature) =>
+      item.layerId === "prirodni-zajimavosti" ||
+      item.typeLabel.toLowerCase().includes("prirodni"),
   },
-  { label: "Vecer", emoji: "🗺️", filter: (item) => item.layerId === "turisticke-regiony" },
+  {
+    label: "Večer",
+    emoji: "🔵",
+    filter: (item: AIFeature) => item.layerId === "turisticke-regiony",
+  },
 ];
 
 export function AIPlanner({ features, onSelect }: PlannerProps) {
   const [plan, setPlan] = useState<AIFeature[]>([]);
   const [isPlanning, setIsPlanning] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const planNarrative = useMemo(() => buildPlanNarrative(plan), [plan]);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    };
+  }, []);
+
+  const showToast = (message: string, duration = 3200) => {
+    setToastMessage(message);
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    toastTimeoutRef.current = setTimeout(() => setToastMessage(null), duration);
+  };
 
   const generatePlan = () => {
     setIsPlanning(true);
@@ -50,8 +71,7 @@ export function AIPlanner({ features, onSelect }: PlannerProps) {
       const usedIds = new Set<string>();
 
       const pushCandidate = (candidate: AIFeature | null) => {
-        if (!candidate) return false;
-        if (usedIds.has(candidate.id)) return false;
+        if (!candidate || usedIds.has(candidate.id)) return false;
         picks.push(candidate);
         usedIds.add(candidate.id);
         return true;
@@ -59,10 +79,7 @@ export function AIPlanner({ features, onSelect }: PlannerProps) {
 
       PLAN_ORDER.forEach(({ filter }) => {
         if (picks.length >= availableCount) return;
-        const match = pickDistinct(
-          features,
-          (item) => filter(item) && !usedIds.has(item.id),
-        );
+        const match = pickDistinct(features, (item) => filter(item) && !usedIds.has(item.id));
         pushCandidate(match);
       });
 
@@ -71,10 +88,7 @@ export function AIPlanner({ features, onSelect }: PlannerProps) {
         const next = pickRandom(remainingPool);
         if (!next) break;
         pushCandidate(next);
-        const index = remainingPool.findIndex((item) => item.id === next.id);
-        if (index >= 0) {
-          remainingPool.splice(index, 1);
-        }
+        remainingPool.splice(remainingPool.findIndex((i) => i.id === next.id), 1);
       }
 
       setPlan(picks.slice(0, availableCount));
@@ -82,32 +96,128 @@ export function AIPlanner({ features, onSelect }: PlannerProps) {
     }, 700);
   };
 
+  const handleExportPdf = async () => {
+    if (plan.length === 0) {
+      showToast("ℹ️ Nejprve vygenerujte plán.", 3600);
+      return;
+    }
+
+    const doc = new jsPDF({
+      unit: "pt",
+      format: "a4",
+    });
+
+    // 🔹 Použij vestavěný font Helvetica, který funguje i v Next.js
+    doc.setFont("helvetica", "normal");
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 50;
+    let y = 80;
+
+    // Nadpis
+    doc.setFontSize(20);
+    doc.setTextColor(30, 30, 30);
+    doc.text(decodeURIComponent(encodeURIComponent("KHK Explore – Můj denní plán")), pageWidth / 2, y, {
+      align: "center",
+    });
+
+    y += 40;
+    doc.setFontSize(12);
+    doc.setTextColor(80, 80, 80);
+
+    // Sekce dne
+    PLAN_ORDER.forEach((slot, index) => {
+      const item = plan[index];
+      if (!item) return;
+
+      const title = `${slot.emoji} ${slot.label}: ${item.title}`;
+      const desc =
+        item.description && item.description.trim()
+          ? item.description.replace(/\s+/g, " ").trim()
+          : buildFriendlySummary(item);
+
+      y += 25;
+      if (y > 770) {
+        doc.addPage();
+        y = 80;
+      }
+
+      // Titulek
+      doc.setFontSize(13);
+      doc.setTextColor(33, 33, 33);
+      doc.text(decodeURIComponent(encodeURIComponent(title)), margin, y);
+      y += 16;
+
+      // Popis
+      doc.setFontSize(11);
+      doc.setTextColor(60, 60, 60);
+      const cleanDesc = decodeURIComponent(encodeURIComponent(desc));
+      const lines = doc.splitTextToSize(cleanDesc, pageWidth - 2 * margin);
+      doc.text(lines, margin, y);
+      y += lines.length * 14;
+    });
+
+    // Patička
+    doc.setFontSize(10);
+    doc.setTextColor(120, 120, 120);
+    doc.text(
+      decodeURIComponent(encodeURIComponent("Exportováno z aplikace KHK Explore © 2025")),
+      pageWidth / 2,
+      doc.internal.pageSize.getHeight() - 40,
+      { align: "center" }
+    );
+
+    doc.save("muj-den.pdf");
+    showToast("✅ PDF bylo úspěšně vytvořeno.", 3600);
+  };
+
+
   return (
     <section className="space-y-4 rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-emerald-50 p-5 text-slate-900 shadow-lg">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <CalendarRange size={18} className="text-emerald-500" />
-          <h2 className="text-lg font-semibold">Naplanovat den</h2>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <CalendarRange size={20} className="text-emerald-500 flex-shrink-0" />
+          <h2 className="truncate text-base sm:text-lg font-semibold text-slate-900 whitespace-nowrap">
+            Naplánovat&nbsp;den
+          </h2>
         </div>
-        <button
-          type="button"
-          onClick={generatePlan}
-          className="inline-flex items-center gap-2 rounded-2xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-emerald-950 shadow-lg shadow-emerald-500/40 transition hover:bg-emerald-400 cursor-pointer disabled:cursor-not-allowed disabled:bg-emerald-900/60 disabled:text-emerald-100"
-          disabled={isPlanning}
-        >
-          {isPlanning ? (
-            <>
-              <Loader2 className="animate-spin" size={16} />
-              Vymyslim...
-            </>
-          ) : (
-            <>
-              <Sparkles size={16} />
-              Generovat plan
-            </>
-          )}
-        </button>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={generatePlan}
+            disabled={isPlanning}
+            className="inline-flex items-center gap-2 rounded-2xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-emerald-950 shadow-md shadow-emerald-500/40 transition hover:bg-emerald-400 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isPlanning ? (
+              <>
+                <Loader2 className="animate-spin" size={16} />
+                Generuji...
+              </>
+            ) : (
+              <>
+                <Sparkles size={16} />
+                Generovat plán
+              </>
+            )}
+          </button>
+        </div>
       </div>
+
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            key="export-toast"
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.2 }}
+            className="inline-flex w-full items-center justify-center rounded-2xl border border-emerald-200/80 bg-white/95 px-4 py-2 text-sm font-medium text-emerald-600 shadow-sm"
+          >
+            {toastMessage}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence mode="wait">
         {plan.length === 0 ? (
@@ -118,7 +228,7 @@ export function AIPlanner({ features, onSelect }: PlannerProps) {
             exit={{ opacity: 0, y: -8 }}
             className="rounded-2xl border border-emerald-200/60 bg-white/95 px-4 py-3 text-sm text-emerald-700"
           >
-            Kliknete na &quot;Generovat plan&quot; a AI sestavi vylet na cely den.
+            Klikněte na <b>„Generovat plán“</b> a AI vám sestaví výlet na celý den.
           </motion.div>
         ) : (
           <motion.div
@@ -127,10 +237,25 @@ export function AIPlanner({ features, onSelect }: PlannerProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -12 }}
             transition={{ duration: 0.25 }}
-            className="space-y-3 rounded-2xl border border-emerald-200/60 bg-white p-4 text-sm leading-relaxed text-slate-700 shadow-inner shadow-emerald-100"
+            className="space-y-3 rounded-2xl border border-emerald-200 bg-white p-4 text-sm text-slate-700 shadow-sm"
           >
-            <p className="text-sm font-semibold text-emerald-600">Tvuj plan:</p>
-            <ul className="space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-emerald-600">Tvůj plán:</p>
+              <motion.button
+                key="pdf-bottom"
+                onClick={handleExportPdf}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.2 }}
+                className="inline-flex items-center gap-2 rounded-full border border-emerald-500 bg-white px-3 py-1 text-xs font-semibold text-emerald-600 shadow-sm transition hover:bg-emerald-50 active:scale-[0.98]"
+              >
+                <FileDown size={14} />
+                Exportovat PDF
+              </motion.button>
+            </div>
+
+            <ul className="mt-2 space-y-2">
               {PLAN_ORDER.map((slot, index) => {
                 const item = plan[index];
                 if (!item) return null;
