@@ -46,7 +46,7 @@ export function AITipsPanel({ tips, onSelect, isLoading = false, message }: AITi
                 "Zadejte, co vas zajima, a AI vam doporuci vylet na miru."}
             </p>
             <p className="text-xs text-slate-400">
-              Napriklad: "Kde najdu klidnou trasu s vyhledem?"
+              Napriklad: &quot;Kde najdu klidnou trasu s vyhledem?&quot;
             </p>
           </motion.div>
         ) : (
