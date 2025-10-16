@@ -19,7 +19,7 @@ import L, {
 } from "leaflet";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { LucideIcon } from "lucide-react";
-import { Bike, Church, Map as MapIcon, TreePine, LocateIcon } from "lucide-react";
+import { Bike, Church, Map as MapIcon, TreePine, LocateIcon, Loader2 } from "lucide-react";
 import type {
   GeoLayerDefinition,
   GeoLayerId,
@@ -56,6 +56,8 @@ export type MapViewProps = {
   selected: SelectedRef;
   userLocation: { lat: number; lng: number } | null;
   nearestFeatureId: SelectedRef;
+  onLocate: () => void;
+  locating: boolean;
 };
 
 type IconRegistryKey = "star-of-david" | "church" | "tree" | "map" | "bike";
@@ -130,7 +132,8 @@ function MapAccessor({
 
   useEffect(() => {
     if (!map || !userLocation) return;
-    map.setView([userLocation.lat, userLocation.lng], 11);
+    const targetZoom = Math.max(map.getZoom(), 14);
+    map.flyTo([userLocation.lat, userLocation.lng], targetZoom, { duration: 1.1 });
   }, [map, userLocation]);
 
   return <FeatureFocus map={map} target={focusTarget} />;
@@ -195,6 +198,8 @@ export function MapView({
   selected,
   userLocation,
   nearestFeatureId,
+  onLocate,
+  locating,
 }: MapViewProps) {
   const [hovered, setHovered] = useState<string | null>(null);
 
@@ -270,6 +275,24 @@ export function MapView({
 
   return (
     <div className="relative h-full w-full overflow-hidden rounded-3xl border border-white/20 dark:border-slate-700">
+      <button
+        type="button"
+        onClick={onLocate}
+        disabled={locating}
+        className="absolute right-4 top-4 z-[1010] inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-2 text-xs font-semibold text-slate-700 shadow-lg transition hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-400/60 cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {locating ? (
+          <>
+            <Loader2 size={14} className="animate-spin" />
+            Lokalizuji...
+          </>
+        ) : (
+          <>
+            <LocateIcon size={16} />
+            Zaměřit mě
+          </>
+        )}
+      </button>
       <MapContainer
         center={DEFAULT_CENTER}
         zoom={DEFAULT_ZOOM}

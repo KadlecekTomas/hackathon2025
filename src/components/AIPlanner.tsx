@@ -87,7 +87,7 @@ export function AIPlanner({ features, onSelect }: PlannerProps) {
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <CalendarRange size={18} className="text-emerald-500" />
-          <h2 className="text-lg font-semibold">Naplanovat den</h2>
+          <h2 className="text-lg font-semibold">Naplánovat den</h2>
         </div>
         <button
           type="button"
@@ -98,12 +98,12 @@ export function AIPlanner({ features, onSelect }: PlannerProps) {
           {isPlanning ? (
             <>
               <Loader2 className="animate-spin" size={16} />
-              Vymyslim...
+              Vymýšlím...
             </>
           ) : (
             <>
               <Sparkles size={16} />
-              Generovat plan
+              Generovat plán
             </>
           )}
         </button>
@@ -118,7 +118,7 @@ export function AIPlanner({ features, onSelect }: PlannerProps) {
             exit={{ opacity: 0, y: -8 }}
             className="rounded-2xl border border-emerald-200/60 bg-white/95 px-4 py-3 text-sm text-emerald-700"
           >
-            Kliknete na &quot;Generovat plan&quot; a AI sestavi vylet na cely den.
+            Klikněte na &quot;Generovat plán&quot; a AI sestaví výlet na celý den.
           </motion.div>
         ) : (
           <motion.div
@@ -129,7 +129,7 @@ export function AIPlanner({ features, onSelect }: PlannerProps) {
             transition={{ duration: 0.25 }}
             className="space-y-3 rounded-2xl border border-emerald-200/60 bg-white p-4 text-sm leading-relaxed text-slate-700 shadow-inner shadow-emerald-100"
           >
-            <p className="text-sm font-semibold text-emerald-600">Tvuj plan:</p>
+            <p className="text-sm font-semibold text-emerald-600">Tvůj plán:</p>
             <ul className="space-y-2">
               {PLAN_ORDER.map((slot, index) => {
                 const item = plan[index];

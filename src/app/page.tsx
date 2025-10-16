@@ -897,6 +897,8 @@ function PageInner() {
                       }
                     : null
                 }
+                onLocate={handleLocate}
+                locating={isLocating}
               />
             </div>
           </div>
