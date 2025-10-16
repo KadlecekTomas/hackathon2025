@@ -17,7 +17,7 @@ export function AITipsPanel({ tips, onSelect, isLoading = false, message }: AITi
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Sparkles size={18} className="text-emerald-500" />
-          <h2 className="text-lg font-semibold">AI doporucuje</h2>
+          <h2 className="text-lg font-semibold">AI doporučuje</h2>
         </div>
       </div>
 
@@ -31,7 +31,7 @@ export function AITipsPanel({ tips, onSelect, isLoading = false, message }: AITi
             className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-500"
           >
             <Compass className="animate-spin" size={16} />
-            AI premysli nad tim, kam vas poslat?
+            AI přemýšlí nad tím, kam vás poslat?
           </motion.div>
         ) : tips.length === 0 ? (
           <motion.div
@@ -43,10 +43,10 @@ export function AITipsPanel({ tips, onSelect, isLoading = false, message }: AITi
           >
             <p>
               {message ??
-                "Zadejte, co vas zajima, a AI vam doporuci vylet na miru."}
+                "Zadejte, co vás zajímá, a AI vám doporučí výlet na míru."}
             </p>
             <p className="text-xs text-slate-400">
-              Napriklad: &quot;Kde najdu klidnou trasu s vyhledem?&quot;
+              Například: &quot;Kde najdu klidnou trasu s výhledem?&quot;
             </p>
           </motion.div>
         ) : (
@@ -95,7 +95,7 @@ export function AITipsPanel({ tips, onSelect, isLoading = false, message }: AITi
 
       <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-500">
         <Info size={14} />
-        AI navrhy vychazeji z aktualnich filtru a dat Kralovehradeckeho kraje.
+        AI návrhy vycházejí z aktuálních filtrů a dat Královéhradeckého kraje.
       </div>
     </section>
   );

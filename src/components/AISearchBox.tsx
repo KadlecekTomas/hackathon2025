@@ -10,7 +10,7 @@ type AISearchBoxProps = {
   onSelect: (feature: AIFeature) => void;
 };
 
-const DEFAULT_HINT = `Zadejte dotaz: "Chci prirodni vylet u Trutnova"`;
+const DEFAULT_HINT = `Zadejte dotaz: "Chci přírodní výlet u Trutnova"`;
 
 export function AISearchBox({ onSearch, onSelect }: AISearchBoxProps) {
   const [query, setQuery] = useState("");
@@ -27,17 +27,17 @@ export function AISearchBox({ onSearch, onSelect }: AISearchBoxProps) {
     if (!hasQuery) {
       setResults([]);
       setMessage(
-        'Zadejte dotaz napr. "Kam na kolo v Broumovsku?" nebo "Chci vylet pro deti".',
+        'Zadejte dotaz např. "Kam na kolo v Broumovsku?" nebo "Chci výlet pro děti".',
       );
       return;
     }
     setIsThinking(true);
-    setPlaceholder("AI premysli nad vasim dotazem...");
+    setPlaceholder("AI přemýšlí nad vaším dotazem...");
     const found = await onSearch(query.trim());
     setResults(found);
     setMessage(
       found.length === 0
-        ? "Bohuzel jsem nenasla odpovidajici vylet. Zkuste upresnit oblast nebo typ aktivity."
+        ? "Bohužel jsem nenašla odpovídající výlet. Zkuste upřesnit oblast nebo typ aktivity."
         : null,
     );
     setIsThinking(false);
@@ -49,67 +49,6 @@ export function AISearchBox({ onSearch, onSelect }: AISearchBoxProps) {
       event.preventDefault();
       void handleSearch();
     }
-  };
-
-  const handleVoiceSearch = () => {
-    if (typeof window === "undefined") return;
-    type SRResult = { transcript: string };
-    type SRResults = { [index: number]: { [index: number]: SRResult } };
-    type SpeechRecognitionEventLike = { results: SRResults };
-    type SpeechRecognitionLike = {
-      lang: string;
-      interimResults: boolean;
-      maxAlternatives: number;
-      onstart: (() => void) | null;
-      onresult: ((event: SpeechRecognitionEventLike) => void) | null;
-      onerror: ((event: unknown) => void) | null;
-      onend: (() => void) | null;
-      start: () => void;
-    };
-    type SpeechRecognitionConstructor = new () => SpeechRecognitionLike;
-    const srGlobal = window as unknown as {
-      SpeechRecognition?: SpeechRecognitionConstructor;
-      webkitSpeechRecognition?: SpeechRecognitionConstructor;
-    };
-    const SpeechRecognitionClass =
-      srGlobal.SpeechRecognition ?? srGlobal.webkitSpeechRecognition;
-    if (!SpeechRecognitionClass) {
-      setMessage("Prohlizec nepodporuje hlasove vyhledavani.");
-      return;
-    }
-    const recognition = new SpeechRecognitionClass();
-    recognition.lang = "cs-CZ";
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-
-    recognition.onstart = () => {
-      setPlaceholder("Nasloucham... mluvte prosim.");
-      setMessage(null);
-    };
-
-    recognition.onresult = (event: SpeechRecognitionEventLike) => {
-      const transcript = event.results[0][0].transcript;
-      setQuery(transcript);
-      void onSearch(transcript).then((found) => {
-        setResults(found);
-        setIsThinking(false);
-        setMessage(
-          found.length === 0
-            ? "Hlasem jsem nic nenasla, zkuste dotaz upravit."
-            : null,
-        );
-        resetPlaceholder();
-      });
-    };
-
-    recognition.onerror = () => {
-      setMessage("Hlasove vyhledavani se nezdarilo, zkuste to znovu.");
-      resetPlaceholder();
-    };
-
-    recognition.onend = resetPlaceholder;
-
-    recognition.start();
   };
 
   const playPing = () => {
@@ -209,7 +148,7 @@ export function AISearchBox({ onSearch, onSelect }: AISearchBoxProps) {
       {!isThinking && results.length === 0 && (message || hasQuery) ? (
         <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs text-slate-500">
           {message ??
-            'Zadejte dotaz a potvrzte jej enterem nebo tlacitkem "Vyhledat".'}
+            'Zadejte dotaz a potvrďte jej enterem nebo tlačítkem "Vyhledat".'}
         </div>
       ) : null}
     </div>

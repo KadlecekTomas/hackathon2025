@@ -15,16 +15,16 @@ export function FavoritesPanel({ favorites, onSelect, onRemove }: FavoritesPanel
       <header className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-lg font-semibold">
           <Heart size={18} className="text-emerald-500" />
-          <span>Oblibene vylety</span>
+          <span>Oblíbené výlety</span>
         </div>
         <span className="rounded-full bg-slate-100 px-3 py-1 text-xs uppercase tracking-wide text-slate-500">
-          {favorites.length} polozek
+          {favorites.length} položek
         </span>
       </header>
 
       {favorites.length === 0 ? (
         <p className="text-sm text-slate-500">
-          Ulozte si tip hvezdickou v detailu a rychle se k nemu vracejte.
+          Uložte si tip hvězdičkou v detailu a rychle se k němu vracejte.
         </p>
       ) : (
         <ul className="space-y-3">

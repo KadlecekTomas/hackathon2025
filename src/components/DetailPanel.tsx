@@ -24,14 +24,14 @@ type NearbyCity = {
 };
 
 const MOCK_CITIES: NearbyCity[] = [
-  { name: "Hradec Kralove", distanceKm: 12, population: 92939 },
-  { name: "Jicin", distanceKm: 31, population: 16262 },
-  { name: "Trutnov", distanceKm: 44, population: 30550 },
+  { name: "Hradec Kralove", distanceKm: 0, population: 92939 },
+  { name: "Jicin", distanceKm: 32, population: 16262 },
+  { name: "Trutnov", distanceKm: 40, population: 30550 },
   { name: "Rychnov nad Kneznou", distanceKm: 24, population: 11221 },
-  { name: "Dvur Kralove nad Labem", distanceKm: 37, population: 15793 },
-  { name: "Nachod", distanceKm: 49, population: 19113 },
-  { name: "Nova Paka", distanceKm: 52, population: 8761 },
-  { name: "Jaromer", distanceKm: 28, population: 12128 },
+  { name: "Dvur Kralove nad Labem", distanceKm: 31, population: 15793 },
+  { name: "Nachod", distanceKm: 26, population: 19113 },
+  { name: "Nova Paka", distanceKm: 33, population: 8761 },
+  { name: "Jaromer", distanceKm: 17, population: 12128 },
 ];
 
 async function mockFindNearbyCities(radiusKm: number): Promise<NearbyCity[]> {
@@ -164,7 +164,7 @@ export function DetailPanel({
               onClick={onShare}
               className="rounded-2xl border border-slate-200 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-600 transition hover:bg-slate-100 cursor-pointer"
             >
-              <Share2 size={14} className="inline-block" /> Sdilet
+              <Share2 size={14} className="inline-block" /> Sdílet
             </button>
             <button
               type="button"
@@ -183,7 +183,7 @@ export function DetailPanel({
               }`}
             >
               <Star size={14} />
-              {isFavorite ? "Ulozeno" : "Ulozit"}
+              {isFavorite ? "Uloženo" : "Uložit"}
             </button>
           </div>
         </div>
@@ -198,7 +198,7 @@ export function DetailPanel({
 
       <section className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 text-sm">
         <h3 className="text-xs uppercase tracking-wide text-slate-500">
-          Zakladni informace
+          Základní informace
         </h3>
         <ul className="space-y-2 text-slate-600">
           {municipality ? (
@@ -221,7 +221,7 @@ export function DetailPanel({
           ) : null}
           {length ? (
             <li>
-              <span className="font-semibold text-slate-800">Delka:</span>{" "}
+              <span className="font-semibold text-slate-800">Délka:</span>{" "}
               {length}
             </li>
           ) : null}
@@ -248,20 +248,20 @@ export function DetailPanel({
                 rel="noopener noreferrer"
                 className="text-blue-600 underline"
               >
-                Otevrit stranky
+                Otevřít stránky
               </a>
             </li>
           ) : null}
           {typeof nearestDistance === "number" ? (
             <li>
               <span className="font-semibold text-slate-800">
-                Vzdalenost od vas:
+                Vzdálenost od vás:
               </span>{" "}
               {nearestDistance.toFixed(1)} km
             </li>
           ) : null}
           <li className="text-xs text-slate-400">
-            ID zaznamu: {getFeatureId(feature)}
+            ID záznamu: {getFeatureId(feature)}
           </li>
         </ul>
       </section>
@@ -271,16 +271,16 @@ export function DetailPanel({
           <Wand2 size={18} className="text-emerald-500" />
           <div>
             <h3 className="text-xs uppercase tracking-wide text-slate-500">
-              Doporucujeme navstivit
+              Doporučujeme navštívit
             </h3>
             <p className="text-xs text-slate-400">
-              Vyber podobnych mist ve stejnem okrese nebo kategorii.
+              Výběr podobných míst ve stejném okrese nebo kategorii.
             </p>
           </div>
         </header>
         {recommendations.length === 0 ? (
           <p className="text-xs text-slate-500">
-            Zadne dalsi tipy pro tuto lokalitu jsme zatim nenasli.
+            Žádné další tipy pro tuto lokalitu jsme zatím nenašli.
           </p>
         ) : (
           <ul className="space-y-2">
@@ -304,7 +304,7 @@ export function DetailPanel({
                     </p>
                   </div>
                   <span className="rounded-full border border-emerald-500 px-3 py-1 text-xs font-semibold text-emerald-600 transition">
-                    Otevrit
+                    Otevřít
                   </span>
                 </button>
               </li>
@@ -315,13 +315,13 @@ export function DetailPanel({
       <section className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 text-sm">
         <div className="flex items-center justify-between gap-2">
           <h3 className="text-xs uppercase tracking-wide text-slate-500">
-            Najdi mesta v okoli
+            Najdi města v okolí
           </h3>
-          <span className="text-xs text-slate-400">demo vypocet bez volani API</span>
+          <span className="text-xs text-slate-400">demo výpočet bez volání API</span>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <label className="flex-1 text-xs uppercase tracking-wide text-slate-500">
-            Polomer (km)
+            Poloměr (km)
             <input
               type="number"
               min={5}
@@ -348,7 +348,7 @@ export function DetailPanel({
 
         {nearbyLoading ? (
           <p className="flex items-center gap-2 text-xs text-slate-500">
-            <Sparkles size={14} /> Hledam mesta v okruhu {radiusKm} km...
+            <Sparkles size={14} /> Hledám města v okruhu {radiusKm} km...
           </p>
         ) : nearby && nearby.length > 0 ? (
           <ul className="space-y-2">
@@ -371,11 +371,11 @@ export function DetailPanel({
           </ul>
         ) : nearby ? (
           <p className="text-xs text-slate-500">
-            V zadanem okruhu jsme nenasli zadne mesto z demo dat.
+            V zadaném okruhu jsme nenašli žádné město z demo dat.
           </p>
         ) : (
           <p className="text-xs text-slate-500">
-            Zadejte polomer a ziskejte tipy na vetsi mesta v okoli pro doprovodny program.
+            Zadejte poloměr a získejte tipy na větší města v okolí pro doprovodný program.
           </p>
         )}
       </section>
