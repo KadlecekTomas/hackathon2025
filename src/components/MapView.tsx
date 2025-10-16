@@ -18,13 +18,7 @@ import L, {
 } from "leaflet";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { LucideIcon } from "lucide-react";
-import {
-  Bike,
-  Church,
-  Map as MapIcon,
-  TreePine,
-  LocateIcon,
-} from "lucide-react";
+import { Bike, Church, Map as MapIcon, TreePine, LocateIcon } from "lucide-react";
 import type {
   GeoLayerDefinition,
   GeoLayerId,
@@ -448,3 +442,4 @@ export function MapView({
     </div>
   );
 }
+

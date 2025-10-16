@@ -38,6 +38,15 @@ import {
   type GeoLayerDefinition,
 } from "@/hooks/useGeoData";
 import { useFilters } from "@/hooks/useFilters";
+import { useAISearch } from "@/hooks/useAISearch";
+import { AISearchBox } from "@/components/AISearchBox";
+import { AITipsPanel } from "@/components/AITipsPanel";
+import { AIPlanner } from "@/components/AIPlanner";
+import {
+  mapFeatureToAIFeature,
+  type AIFeature,
+  buildFriendlySummary,
+} from "@/utils/aiUtils";
 
 type SelectedState =
   | {
@@ -87,7 +96,6 @@ function PageInner() {
 
   const [selected, setSelected] = useState<SelectedState>(null);
   const [favorites, setFavorites] = useState<FavoriteFeature[]>([]);
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [userLocation, setUserLocation] = useState<{
     lat: number;
     lng: number;
@@ -101,33 +109,20 @@ function PageInner() {
   } | null>(null);
   const [shareMessage, setShareMessage] = useState<string | null>(null);
   const [mobilePanelOpen, setMobilePanelOpen] = useState(false);
-  const [mobilePanelTab, setMobilePanelTab] = useState<"detail" | "favorites">(
-    "detail",
-  );
+  const [mobilePanelTab, setMobilePanelTab] = useState<
+    "detail" | "favorites" | "ai"
+  >("detail");
   const [pendingSelectionId, setPendingSelectionId] = useState<string | null>(
     null,
   );
+  const [aiSearchResults, setAiSearchResults] = useState<AIFeature[]>([]);
+  const [aiAutoTips, setAiAutoTips] = useState<AIFeature[]>([]);
+  const [aiMessage, setAiMessage] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
 
   useEffect(() => {
     setFavorites(loadFavorites());
   }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const stored = window.localStorage.getItem("khk-theme");
-    if (stored === "light" || stored === "dark") {
-      setTheme(stored);
-      return;
-    }
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    setTheme(prefersDark ? "dark" : "light");
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    window.document.documentElement.classList.toggle("dark", theme === "dark");
-    window.localStorage.setItem("khk-theme", theme);
-  }, [theme]);
 
   useEffect(() => {
     layers.forEach((layer) => {
@@ -205,10 +200,6 @@ function PageInner() {
       { scroll: false },
     );
   }, [selected, router, pathname]);
-
-  const handleToggleTheme = useCallback(() => {
-    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
-  }, []);
 
   const visibleFeatureEntries = useMemo(() => {
     const entries: Array<{
@@ -289,6 +280,56 @@ function PageInner() {
       favorites.map((favorite) => `${favorite.layerId}:${favorite.id}`),
     );
   }, [favorites]);
+
+  const aiFeatures = useMemo(() => {
+    const items: AIFeature[] = [];
+    layers.forEach((layer) => {
+      const collection = data[layer.id];
+      if (!collection) return;
+      featureCollectionToArray(collection).forEach((feature) => {
+        items.push(mapFeatureToAIFeature(layer, feature));
+      });
+    });
+    return items;
+  }, [layers, data]);
+
+  const { search: aiSearch } = useAISearch({ features: aiFeatures });
+
+  useEffect(() => {
+    const relevant = aiFeatures.filter((item) => {
+      if (!activeLayerSet.has(item.layerId as GeoLayerId)) return false;
+      if (locationFilter.district && item.district !== locationFilter.district) {
+        return false;
+      }
+      if (locationFilter.region && item.region !== locationFilter.region) {
+        return false;
+      }
+      return true;
+    });
+    const topRelevant = relevant.slice(0, 3);
+    setAiAutoTips(topRelevant);
+    if (aiSearchResults.length === 0) {
+      setAiMessage(
+        topRelevant.length > 0
+          ? "Tipy podle aktuálně vybraných filtrů."
+          : "Zadejte, co vás zajímá, a AI vám doporučí výlet.",
+      );
+    }
+  }, [
+    aiFeatures,
+    activeLayerSet,
+    locationFilter.district,
+    locationFilter.region,
+    aiSearchResults.length,
+  ]);
+
+  const plannerFeatures = useMemo(
+    () =>
+      aiFeatures.filter((item) =>
+        activeLayerSet.has(item.layerId as GeoLayerId),
+      ),
+    [aiFeatures, activeLayerSet],
+  );
 
   const isFavorite = useCallback(
     (layerId: GeoLayerId, featureId: string) =>
@@ -373,6 +414,45 @@ function PageInner() {
     loadLayer,
     handleSelectFeature,
   ]);
+
+  const handleAISearchQuery = useCallback(
+    async (query: string) => {
+      if (!query.trim()) {
+        setAiSearchResults([]);
+        setAiMessage("Napište, co vás zajímá, a AI doporučí výlet.");
+        return [];
+      }
+      setAiLoading(true);
+      const results = aiSearch(query.trim());
+      await new Promise((resolve) => setTimeout(resolve, 320));
+      setAiSearchResults(results);
+      if (results.length === 0) {
+        setAiMessage(
+          "Bohužel jsem v této oblasti nenašel odpovídající výlet. Zkuste jinou oblast.",
+        );
+      } else {
+        setAiMessage("Našla jsem tipy, které by se vám mohly líbit.");
+        if (typeof window !== "undefined" && window.innerWidth < 1024) {
+          setMobilePanelOpen(true);
+          setMobilePanelTab("ai");
+        }
+      }
+      setAiLoading(false);
+      return results;
+    },
+    [aiSearch],
+  );
+
+  const handleAISuggestionSelect = useCallback(
+    (item: AIFeature) => {
+      if (!data[item.layerId as GeoLayerId]) {
+        void loadLayer(item.layerId as GeoLayerId);
+      }
+      setShareMessage(buildFriendlySummary(item));
+      handleSelectFeature(item.layerId as GeoLayerId, item.feature);
+    },
+    [data, loadLayer, handleSelectFeature],
+  );
 
   const handleLocate = useCallback(() => {
     if (typeof window === "undefined" || !navigator.geolocation) {
@@ -524,6 +604,9 @@ function PageInner() {
     return sorted.slice(0, 3);
   }, [selected, selectedFeature, visibleFeatureEntries.entries]);
 
+  const displayedAITips =
+    aiSearchResults.length > 0 ? aiSearchResults : aiAutoTips;
+
   const detailPanel = (
     <DetailPanel
       feature={selectedFeature}
@@ -557,16 +640,16 @@ function PageInner() {
   );
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 pb-24 text-white dark:from-slate-950 dark:via-slate-950 dark:to-slate-950">
+    <main className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-100 pb-24 text-slate-900">
       <div className="mx-auto flex max-w-[120rem] flex-col gap-6 px-4 py-6 sm:px-6 lg:gap-8 lg:px-10 lg:py-10">
-        <header className="space-y-4 rounded-3xl border border-white/10 bg-white/5 p-6 text-white shadow-xl backdrop-blur dark:border-slate-700 dark:bg-slate-900/80">
-          <p className="inline-flex items-center gap-2 rounded-full bg-emerald-400/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-200 dark:bg-emerald-400/15 dark:text-emerald-200/90">
+        <header className="space-y-4 rounded-3xl border border-slate-200 bg-white p-6 text-slate-900 shadow-xl">
+          <p className="inline-flex items-center gap-2 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-700">
             Poznej Královéhradecký kraj
           </p>
-          <h1 className="text-3xl font-bold leading-tight text-white sm:text-4xl lg:text-5xl dark:text-slate-50">
+          <h1 className="text-3xl font-bold leading-tight text-slate-900 sm:text-4xl lg:text-5xl">
             KHK Explore – interaktivní průvodce zážitky
           </h1>
-          <p className="max-w-3xl text-balance text-sm text-white/80 sm:text-base dark:text-slate-300">
+          <p className="max-w-3xl text-balance text-sm text-slate-600 sm:text-base">
             Objevujte židovské a církevní památky, přírodní zajímavosti i turistické
             regiony Královéhradeckého kraje. Vrstvy, filtry, oblíbené tipy a náhodná
             doporučení vám pomohou naplánovat perfektní výlet.
@@ -592,12 +675,14 @@ function PageInner() {
           totalCount={visibleFeatureEntries.total}
           favoritesCount={favorites.length}
           activeLayerCount={activeLayerSet.size}
-          onToggleTheme={handleToggleTheme}
-          isDarkMode={theme === "dark"}
         />
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)] xl:grid-cols-[minmax(0,3fr)_minmax(360px,1.2fr)]">
           <div className="flex flex-col gap-6">
+            <AISearchBox
+              onSearch={handleAISearchQuery}
+              onSelect={handleAISuggestionSelect}
+            />
             <LayerControl
               layers={layers}
               metadataByLayer={metadataByLayer}
@@ -605,7 +690,7 @@ function PageInner() {
               toggleLayer={toggleLayer}
               setAllLayers={setAllLayers}
             />
-            <div className="relative h-[65vh] min-h-[420px] overflow-hidden rounded-3xl bg-slate-900/40 shadow-2xl sm:h-[70vh]">
+            <div className="relative h-[65vh] min-h-[420px] overflow-hidden rounded-3xl bg-white shadow-2xl sm:h-[70vh]">
               <MapView
                 layers={layers}
                 data={data}
@@ -614,23 +699,33 @@ function PageInner() {
                 shouldDisplayFeature={shouldDisplayFeature}
                 onSelectFeature={handleSelectFeature}
                 onToggleFavorite={handleToggleFavorite}
-              isFavorite={isFavorite}
-              selected={selected}
-              userLocation={userLocation}
-              nearestFeatureId={
-                nearestFeature
-                  ? {
-                      layerId: nearestFeature.layerId,
-                      featureId: nearestFeature.featureId,
-                    }
-                  : null
-              }
-            />
-          </div>
+                isFavorite={isFavorite}
+                selected={selected}
+                userLocation={userLocation}
+                nearestFeatureId={
+                  nearestFeature
+                    ? {
+                        layerId: nearestFeature.layerId,
+                        featureId: nearestFeature.featureId,
+                      }
+                    : null
+                }
+              />
+            </div>
           </div>
 
           <div className="hidden lg:flex flex-col gap-6">
             {detailPanel}
+            <AIPlanner
+              features={plannerFeatures}
+              onSelect={handleAISuggestionSelect}
+            />
+            <AITipsPanel
+              tips={displayedAITips}
+              onSelect={handleAISuggestionSelect}
+              isLoading={aiLoading}
+              message={aiMessage}
+            />
             {favoritesPanel}
           </div>
         </div>
@@ -643,7 +738,7 @@ function PageInner() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 40 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-x-0 bottom-0 z-40 rounded-t-3xl border-t border-white/10 bg-slate-950/90 p-5 text-white shadow-2xl backdrop-blur dark:border-slate-800 dark:bg-slate-950/95 lg:hidden"
+            className="fixed inset-x-0 bottom-0 z-40 rounded-t-3xl border-t border-slate-200 bg-white p-5 text-slate-900 shadow-2xl lg:hidden"
           >
             <div className="mb-4 flex items-center justify-between gap-3">
               <div className="flex gap-2">
@@ -671,6 +766,18 @@ function PageInner() {
                 >
                   Oblíbené
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setMobilePanelTab("ai")}
+                  className={[
+                    "rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-wide transition",
+                    mobilePanelTab === "ai"
+                      ? "bg-emerald-500 text-emerald-950"
+                      : "bg-white/10 text-white",
+                  ].join(" ")}
+                >
+                  AI průvodce
+                </button>
               </div>
               <button
                 type="button"
@@ -681,7 +788,24 @@ function PageInner() {
               </button>
             </div>
             <div className="max-h-[65vh] overflow-y-auto">
-              {mobilePanelTab === "detail" ? detailPanel : favoritesPanel}
+              {mobilePanelTab === "detail" ? (
+                detailPanel
+              ) : mobilePanelTab === "favorites" ? (
+                favoritesPanel
+              ) : (
+                <div className="space-y-4">
+                  <AIPlanner
+                    features={plannerFeatures}
+                    onSelect={handleAISuggestionSelect}
+                  />
+                  <AITipsPanel
+                    tips={displayedAITips}
+                    onSelect={handleAISuggestionSelect}
+                    isLoading={aiLoading}
+                    message={aiMessage}
+                  />
+                </div>
+              )}
             </div>
           </motion.div>
         ) : null}
@@ -693,7 +817,7 @@ function PageInner() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full bg-white/80 px-6 py-3 text-sm font-semibold text-slate-900 shadow-lg backdrop-blur dark:bg-slate-800/90 dark:text-slate-100"
+            className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-lg backdrop-blur"
           >
             {shareMessage}
           </motion.div>
@@ -710,3 +834,4 @@ export default function Home() {
     </Suspense>
   );
 }
+
