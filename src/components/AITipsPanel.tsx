@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Compass, Info, MapPinned, Sparkles } from "lucide-react";
+import { Compass, Info, Sparkles } from "lucide-react";
 import type { AIFeature } from "@/utils/aiUtils";
 
 type AITipsPanelProps = {
@@ -59,36 +59,34 @@ export function AITipsPanel({ tips, onSelect, isLoading = false, message }: AITi
             className="space-y-3"
           >
             {tips.map((tip) => (
-              <li
-                key={tip.id}
-                className="space-y-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm transition hover:border-emerald-300 hover:bg-emerald-50"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-base font-semibold text-slate-900">
-                      {tip.title}
-                    </p>
-                    <p className="text-xs uppercase tracking-wide text-emerald-600">
-                      {tip.typeLabel}
-                    </p>
+              <li key={tip.id}>
+                <button
+                  type="button"
+                  onClick={() => onSelect(tip)}
+                  className="flex w-full flex-col gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left text-sm transition hover:border-emerald-300 hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-400/60"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-base font-semibold text-slate-900">
+                        {tip.title}
+                      </p>
+                      <p className="text-xs uppercase tracking-wide text-emerald-600">
+                        {tip.typeLabel}
+                      </p>
+                    </div>
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600">
+                      Zobrazit
+                    </span>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => onSelect(tip)}
-                    className="inline-flex items-center gap-1 rounded-full border border-emerald-500 px-3 py-1 text-xs font-semibold text-emerald-600 transition hover:bg-emerald-500 hover:text-emerald-950"
-                  >
-                    <MapPinned size={14} />
-                    Zobrazit
-                  </button>
-                </div>
-                <p className="text-xs leading-relaxed text-slate-500">
-                  {tip.description}
-                </p>
-                <div className="flex flex-wrap gap-x-3 gap-y-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-                  {tip.district ? <span>Okres {tip.district}</span> : null}
-                  {tip.region ? <span>{tip.region}</span> : null}
-                  <span>{tip.layerTitle}</span>
-                </div>
+                  <p className="text-xs leading-relaxed text-slate-500">
+                    {tip.description}
+                  </p>
+                  <div className="flex flex-wrap gap-x-3 gap-y-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                    {tip.district ? <span>Okres {tip.district}</span> : null}
+                    {tip.region ? <span>{tip.region}</span> : null}
+                    <span>{tip.layerTitle}</span>
+                  </div>
+                </button>
               </li>
             ))}
           </motion.ul>
