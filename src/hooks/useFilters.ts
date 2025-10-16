@@ -17,9 +17,13 @@ type UseFiltersArgs = {
   layers: GeoLayerDefinition[];
 };
 
+const INITIALLY_DISABLED_LAYERS: GeoLayerId[] = ["turisticke-regiony"];
+
 export function useFilters({ layers }: UseFiltersArgs) {
   const [activeLayerIds, setActiveLayerIds] = useState<GeoLayerId[]>(() =>
-    layers.map((layer) => layer.id),
+    layers
+      .filter((layer) => !INITIALLY_DISABLED_LAYERS.includes(layer.id))
+      .map((layer) => layer.id),
   );
   const [locationFilter, setLocationFilter] = useState<LocationFilter>({
     district: null,
@@ -30,14 +34,27 @@ export function useFilters({ layers }: UseFiltersArgs) {
     setActiveLayerIds((prev) => {
       const current = new Set(prev);
       let changed = false;
+
+      // add new layers that are not disabled by default
       layers.forEach((layer) => {
         if (!current.has(layer.id)) {
-          current.add(layer.id);
+          if (!INITIALLY_DISABLED_LAYERS.includes(layer.id)) {
+            current.add(layer.id);
+            changed = true;
+          }
+        }
+      });
+
+      // remove layers that no longer exist
+      const availableLayerIds = new Set(layers.map((layer) => layer.id));
+      current.forEach((layerId) => {
+        if (!availableLayerIds.has(layerId)) {
+          current.delete(layerId);
           changed = true;
         }
       });
-      const next = Array.from(current);
-      return changed ? next : prev;
+
+      return changed ? Array.from(current) : prev;
     });
   }, [layers]);
 
