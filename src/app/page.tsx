@@ -6,6 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { jsPDF } from "jspdf";
+import { MapPin, Sparkles } from "lucide-react";
 import type { Feature } from "geojson";
 import type { MapViewProps } from "@/components/MapView";
 import { FilterPanel } from "@/components/FilterPanel";
@@ -818,18 +819,34 @@ function PageInner() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-100 pb-24 text-slate-900">
       <div className="mx-auto flex max-w-[120rem] flex-col gap-6 px-4 py-6 sm:px-6 lg:gap-8 lg:px-10 lg:py-10">
-        <header className="space-y-4 rounded-3xl border border-slate-200 bg-white p-6 text-slate-900 shadow-xl">
-          <p className="inline-flex items-center gap-2 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-700">
-            Poznej Královéhradecký kraj
-          </p>
-          <h1 className="text-3xl font-bold leading-tight text-slate-900 sm:text-4xl lg:text-5xl">
-            KHK Explore – interaktivní průvodce zážitky
-          </h1>
-          <p className="max-w-3xl text-balance text-sm text-slate-600 sm:text-base">
-            Objevujte židovské a církevní památky, přírodní zajímavosti i turistické
-            regiony Královéhradeckého kraje. Vrstvy, filtry, oblíbené tipy a náhodná
-            doporučení vám pomohou naplánovat perfektní výlet.
-          </p>
+        <header className="">
+          <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,_rgba(16,185,129,0.15),_transparent_55%)]" />
+          <div className="absolute inset-y-0 right-0 -z-10 hidden w-2/5 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.1),_transparent_60%)] blur-2xl md:block" />
+          <div className="relative z-10 flex flex-col gap-5">
+            
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="max-w-3xl space-y-3">
+                <h1 className="text-4xl sm:text-[2.8rem] lg:text-[3rem] font-extrabold leading-tight text-black bg-green-200 px-6 py-2 rounded-xl inline-block">
+  OBJEVKRAJ.CZ
+</h1>
+
+
+               
+             
+              </div>
+              
+              <div className="flex flex-col gap-2 text-sm text-slate-600 sm:flex-row sm:items-center sm:gap-3">
+                <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-4 py-1.5 font-semibold text-emerald-700 shadow-sm backdrop-blur">
+                  <MapPin size={40} />
+                  <span>Mapove vrstvy a filtry</span>
+                </div>
+                <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-4 py-1.5 font-semibold text-slate-700 shadow-sm backdrop-blur">
+                  <Sparkles size={40} className="text-emerald-500" />
+                  <span>AI doporuceni a itinerare</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </header>
 
         <FilterPanel
