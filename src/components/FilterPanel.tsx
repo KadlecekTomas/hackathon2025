@@ -70,7 +70,7 @@ export function FilterPanel({
               Zážitky KHK Explore
             </p>
             <h2 className="text-base sm:text-lg font-semibold leading-snug text-slate-800">
-              Informace a filtry
+              Informace a nastavení
             </h2>
           </div>
 
