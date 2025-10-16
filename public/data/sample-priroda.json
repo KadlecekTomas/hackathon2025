@@ -1,0 +1,44 @@
+{
+  "type": "FeatureCollection",
+  "name": "SamplePrirodaKHK",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "OBJECTID": 30001,
+        "NAZEV": "Adršpašsko-teplické skály",
+        "POPIS": "Národní přírodní rezervace s unikátními skalními městy a jezírky.",
+        "OBEC": "Adršpach",
+        "KRAJ": "Královéhradecký kraj",
+        "WEB": "https://www.adrspasskeskaly.cz/"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [16.0867, 50.6117],
+            [16.1414, 50.6206],
+            [16.1534, 50.5899],
+            [16.1170, 50.5762],
+            [16.0867, 50.6117]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "OBJECTID": 30002,
+        "NAZEV": "Babiččino údolí",
+        "POPIS": "Romantické údolí řeky Úpy známé z literatury Boženy Němcové.",
+        "OBEC": "Ratibořice",
+        "KRAJ": "Královéhradecký kraj",
+        "WEB": "https://www.babiccino-udoli.cz/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [16.0776, 50.4362]
+      }
+    }
+  ]
+}

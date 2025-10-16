@@ -1,0 +1,26 @@
+{
+  "type": "FeatureCollection",
+  "name": "SampleKHKExplore",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "OBJECTID": 40001,
+        "NAZEV": "Demo trasa KHK Explore",
+        "POPIS": "Zkušební trasa pro ukázku načítání dat v aplikaci KHK Explore.",
+        "DELKA_KM": 5.6,
+        "OBEC": "Hradec Králové",
+        "KRAJ": "Královéhradecký kraj"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [15.8305, 50.2151],
+          [15.8427, 50.2194],
+          [15.8549, 50.2236],
+          [15.8670, 50.2277]
+        ]
+      }
+    }
+  ]
+}
