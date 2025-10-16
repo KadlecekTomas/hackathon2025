@@ -149,21 +149,23 @@ function getPopupContent(
   );
 
   return `
-    <div class="space-y-2 khk-popup-content">
-      <button
-        type="button"
-        class="khk-popup-close"
-        data-action="close"
-        data-feature="${compoundId}"
-        aria-label="Zavrit"
-      >
-        &times;
-      </button>
-      <div class="flex items-center gap-2 text-sm text-slate-600">
-        <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/20 text-xs font-semibold" style="color:${layer.color}">
-          ${layerIconMarkup}
-        </span>
-        <span class="text-xs uppercase tracking-wide text-slate-500">${layer.title}</span>
+    <div class="space-y-3 khk-popup-content">
+      <div class="flex items-start justify-between gap-3">
+        <div class="flex items-center gap-2 text-sm text-slate-600">
+          <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/20 text-xs font-semibold" style="color:${layer.color}">
+            ${layerIconMarkup}
+          </span>
+          <span class="text-xs uppercase tracking-wide text-slate-500">${layer.title}</span>
+        </div>
+        <button
+          type="button"
+          class="khk-popup-close ml-auto"
+          data-action="close"
+          data-feature="${compoundId}"
+          aria-label="Zavrit"
+        >
+          &times;
+        </button>
       </div>
       <h3 class="font-semibold text-base text-slate-900 leading-tight">${title}</h3>
       <p class="text-sm text-slate-600 leading-relaxed">${description}</p>
@@ -174,13 +176,6 @@ function getPopupContent(
           data-feature="${compoundId}"
         >
           Ulozit
-        </button>
-        <button
-          class="khk-popup-button khk-popup-button--secondary"
-          data-action="detail"
-          data-feature="${compoundId}"
-        >
-          Zobrazit detail
         </button>
       </div>
     </div>
@@ -391,9 +386,6 @@ export function MapView({
                   const favoriteButton = document.querySelector(
                     `.khk-popup button[data-feature="${compoundId}"][data-action="favorite"]`,
                   ) as HTMLButtonElement | null;
-                  const detailButton = document.querySelector(
-                    `.khk-popup button[data-feature="${compoundId}"][data-action="detail"]`,
-                  ) as HTMLButtonElement | null;
                   const closeButton = document.querySelector(
                     `.khk-popup button[data-feature="${compoundId}"][data-action="close"]`,
                   ) as HTMLButtonElement | null;
@@ -412,13 +404,6 @@ export function MapView({
                             : "Ulozit";
                         }
                       }, 150);
-                    };
-                  }
-
-                  if (detailButton) {
-                    detailButton.onclick = (event) => {
-                      event.stopPropagation();
-                      onSelectFeature(layer.id, typed);
                     };
                   }
 
