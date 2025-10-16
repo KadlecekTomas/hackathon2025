@@ -19,6 +19,14 @@
     color: #e2e8f0;
   }
 
+  .dark body {
+    background: radial-gradient(circle at 15% 20%, rgba(56, 189, 248, 0.15), transparent 55%),
+      radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.12), transparent 45%),
+      radial-gradient(circle at 50% 80%, rgba(14, 116, 144, 0.18), transparent 60%),
+      #020617;
+    color: #e2e8f0;
+  }
+
   ::selection {
     background-color: rgba(16, 185, 129, 0.3);
     color: #f8fafc;
@@ -41,6 +49,92 @@
     background: transparent;
     color: inherit;
     box-shadow: none;
+  }
+
+  .khk-popup-content {
+    font-family: var(--font-geist-sans), sans-serif;
+  }
+
+  .khk-popup-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.55rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: rgba(15, 118, 110, 0.4);
+    color: #f0fdf4;
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .khk-popup-button:hover {
+    background: rgba(16, 185, 129, 0.6);
+  }
+
+  .khk-popup-button--secondary {
+    background: rgba(148, 163, 184, 0.25);
+    border-color: rgba(148, 163, 184, 0.35);
+    color: rgba(241, 245, 249, 0.9);
+  }
+
+  .khk-popup-button--secondary:hover {
+    background: rgba(148, 163, 184, 0.45);
+  }
+
+  .khk-marker {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 18px;
+    background: radial-gradient(circle at 50% 40%, rgba(255,255,255,0.95), rgba(255,255,255,0.65));
+    color: #0f172a;
+    border: 3px solid var(--marker-color, #38bdf8);
+    box-shadow: 0 14px 24px rgba(15, 23, 42, 0.35);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .khk-marker::after {
+    content: "";
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 12px;
+    height: 12px;
+    background: var(--marker-color, #38bdf8);
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.4);
+  }
+
+  .khk-marker--selected {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 20px 35px rgba(14, 165, 233, 0.35);
+  }
+
+  .khk-marker--favorite::before {
+    content: "★";
+    position: absolute;
+    top: -10px;
+    right: -12px;
+    font-size: 14px;
+    color: #facc15;
+    text-shadow: 0 4px 10px rgba(250, 204, 21, 0.5);
+  }
+
+  .khk-marker__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--marker-color, #38bdf8);
   }
 }
 

@@ -1,65 +1,141 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
-import type { GeoLayerDefinition, GeoCategory } from "@/hooks/useGeoData";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type { Feature } from "geojson";
+import {
+  getFeatureDistrict,
+  getFeatureRegion,
+} from "@/utils/featureUtils";
+import type { GeoLayerDefinition, GeoLayerId } from "@/hooks/useGeoData";
 
-export type FilterKey = GeoCategory | "vse";
+export type LocationFilter = {
+  district: string | null;
+  region: string | null;
+};
 
-const DEFAULT_FILTERS: FilterKey[] = ["vse"];
+type UseFiltersArgs = {
+  layers: GeoLayerDefinition[];
+};
 
-export function useFilters(initialFilters: FilterKey[] = DEFAULT_FILTERS) {
-  const [activeFilters, setActiveFilters] =
-    useState<FilterKey[]>(initialFilters);
+export function useFilters({ layers }: UseFiltersArgs) {
+  const [activeLayerIds, setActiveLayerIds] = useState<GeoLayerId[]>(() =>
+    layers.map((layer) => layer.id),
+  );
+  const [locationFilter, setLocationFilter] = useState<LocationFilter>({
+    district: null,
+    region: null,
+  });
 
-  const toggleFilter = useCallback((filter: FilterKey) => {
-    setActiveFilters((prev) => {
-      const hasFilter = prev.includes(filter);
-      if (filter === "vse") {
-        return ["vse"];
+  useEffect(() => {
+    setActiveLayerIds((prev) => {
+      const current = new Set(prev);
+      let changed = false;
+      layers.forEach((layer) => {
+        if (!current.has(layer.id)) {
+          current.add(layer.id);
+          changed = true;
+        }
+      });
+      const next = Array.from(current);
+      return changed ? next : prev;
+    });
+  }, [layers]);
+
+  const isLayerActive = useCallback(
+    (layerId: GeoLayerId) => activeLayerIds.includes(layerId),
+    [activeLayerIds],
+  );
+
+  const toggleLayer = useCallback((layerId: GeoLayerId) => {
+    setActiveLayerIds((prev) => {
+      const hasLayer = prev.includes(layerId);
+      if (hasLayer) {
+        return prev.filter((id) => id !== layerId);
       }
-      const nextFilters = hasFilter
-        ? prev.filter((item) => item !== filter)
-        : [...prev.filter((item) => item !== "vse"), filter];
-      return nextFilters.length === 0 ? ["vse"] : nextFilters;
+      return [...prev, layerId];
     });
   }, []);
 
-  const activateFilters = useCallback((filters: FilterKey[]) => {
-    if (filters.length === 0) {
-      setActiveFilters(["vse"]);
-      return;
+  const setAllLayers = useCallback((enabled: boolean) => {
+    if (enabled) {
+      setActiveLayerIds(layers.map((layer) => layer.id));
+    } else {
+      setActiveLayerIds([]);
     }
-    setActiveFilters(filters);
+  }, [layers]);
+
+  const clearLocationFilters = useCallback(() => {
+    setLocationFilter({ district: null, region: null });
   }, []);
 
-  const isActive = useCallback(
-    (filter: FilterKey) => activeFilters.includes(filter),
-    [activeFilters],
+  const setDistrictFilter = useCallback((district: string | null) => {
+    setLocationFilter((prev) => ({
+      ...prev,
+      district: district && district.trim().length > 0 ? district : null,
+    }));
+  }, []);
+
+  const setRegionFilter = useCallback((region: string | null) => {
+    setLocationFilter((prev) => ({
+      ...prev,
+      region: region && region.trim().length > 0 ? region : null,
+    }));
+  }, []);
+
+  const shouldDisplayFeature = useCallback(
+    (layerId: GeoLayerId, feature: Feature) => {
+      if (!isLayerActive(layerId)) return false;
+      if (!locationFilter.district && !locationFilter.region) return true;
+
+      const district = getFeatureDistrict(feature);
+      if (
+        locationFilter.district &&
+        (!district ||
+          district.localeCompare(locationFilter.district, "cs", {
+            sensitivity: "accent",
+          }) !== 0)
+      ) {
+        return false;
+      }
+
+      const region = getFeatureRegion(feature);
+      if (
+        locationFilter.region &&
+        (!region ||
+          region.localeCompare(locationFilter.region, "cs", {
+            sensitivity: "accent",
+          }) !== 0)
+      ) {
+        return false;
+      }
+
+      return true;
+    },
+    [isLayerActive, locationFilter.district, locationFilter.region],
   );
 
   const shouldDisplayLayer = useCallback(
     (layer: GeoLayerDefinition) => {
-      if (activeFilters.includes("vse")) return true;
-      return activeFilters.includes(layer.category);
+      if (!isLayerActive(layer.id)) return false;
+      if (!locationFilter.district && !locationFilter.region) return true;
+      return true;
     },
-    [activeFilters],
+    [isLayerActive, locationFilter.district, locationFilter.region],
   );
 
-  const activeCategories = useMemo(() => {
-    if (activeFilters.includes("vse")) {
-      return new Set<GeoCategory>(["cyklotrasy", "pamatky", "priroda"]);
-    }
-    return new Set(
-      activeFilters.filter((filter): filter is GeoCategory => filter !== "vse"),
-    );
-  }, [activeFilters]);
+  const activeLayerSet = useMemo(() => new Set(activeLayerIds), [activeLayerIds]);
 
   return {
-    activeFilters,
-    activeCategories,
-    isActive,
-    toggleFilter,
-    setFilters: activateFilters,
+    activeLayerIds,
+    activeLayerSet,
+    isLayerActive,
+    toggleLayer,
+    setAllLayers,
+    locationFilter,
+    setDistrictFilter,
+    setRegionFilter,
+    clearLocationFilters,
+    shouldDisplayFeature,
     shouldDisplayLayer,
   };
 }

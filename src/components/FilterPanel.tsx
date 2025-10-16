@@ -1,141 +1,193 @@
 "use client";
 
-import { useState } from "react";
-import type { FilterKey } from "@/hooks/useFilters";
-
-const FILTER_OPTIONS: Array<{
-  key: FilterKey;
-  label: string;
-  accent: string;
-}> = [
-  { key: "vse", label: "Vše", accent: "from-slate-700/80 to-slate-900/80" },
-  {
-    key: "cyklotrasy",
-    label: "Cyklotrasy",
-    accent: "from-blue-600/90 to-blue-700/90",
-  },
-  {
-    key: "pamatky",
-    label: "Památky",
-    accent: "from-amber-500/90 to-amber-600/90",
-  },
-  {
-    key: "priroda",
-    label: "Příroda",
-    accent: "from-emerald-500/90 to-emerald-600/90",
-  },
-];
+import { motion } from "framer-motion";
+import {
+  LocateIcon,
+  Moon,
+  RefreshCcw,
+  Sparkles,
+  Sun,
+} from "lucide-react";
 
 type FilterPanelProps = {
-  activeFilters: FilterKey[];
-  toggleFilter: (filter: FilterKey) => void;
+  availableDistricts: string[];
+  availableRegions: string[];
+  selectedDistrict: string | null;
+  selectedRegion: string | null;
+  onDistrictChange: (value: string | null) => void;
+  onRegionChange: (value: string | null) => void;
+  onClearFilters: () => void;
   onRandomTip: () => void;
-  onReset?: () => void;
+  onLocate: () => void;
+  locating: boolean;
+  nearestInfo: string | null;
+  visibleCount: number;
+  totalCount: number;
+  favoritesCount: number;
+  activeLayerCount: number;
+  onToggleTheme: () => void;
+  isDarkMode: boolean;
 };
 
 export function FilterPanel({
-  activeFilters,
-  toggleFilter,
+  availableDistricts,
+  availableRegions,
+  selectedDistrict,
+  selectedRegion,
+  onDistrictChange,
+  onRegionChange,
+  onClearFilters,
   onRandomTip,
-  onReset,
+  onLocate,
+  locating,
+  nearestInfo,
+  visibleCount,
+  totalCount,
+  favoritesCount,
+  activeLayerCount,
+  onToggleTheme,
+  isDarkMode,
 }: FilterPanelProps) {
-  const [openMobile, setOpenMobile] = useState(false);
+  const ThemeIcon = isDarkMode ? Sun : Moon;
+  const themeLabel = isDarkMode ? "Světlý režim" : "Tmavý režim";
 
   return (
-    <section className="space-y-4 rounded-3xl bg-slate-900/50 p-5 text-white shadow-xl backdrop-blur">
-      <header className="flex items-center justify-between gap-3">
+    <motion.section
+      initial={{ opacity: 0, y: -12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="space-y-6 rounded-3xl border border-white/10 bg-white/10 p-6 text-white shadow-xl backdrop-blur dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-100"
+    >
+      <header className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="text-lg font-semibold tracking-tight">
-            Filtrovat vrstvy
-          </h2>
-          <p className="text-sm text-slate-300">
-            Vyberte, jaké typy zážitků se mají zobrazit na mapě.
+          <p className="inline-flex items-center gap-2 rounded-full bg-emerald-400/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-200 dark:bg-emerald-400/15 dark:text-emerald-200/90">
+            Zážitky KHK Explore
           </p>
+          <h2 className="mt-2 text-2xl font-semibold leading-snug text-white dark:text-slate-50">
+            Vyberte oblast a objevujte
+          </h2>
         </div>
         <button
           type="button"
-          onClick={onRandomTip}
-          className="inline-flex h-10 shrink-0 items-center gap-2 rounded-full bg-white/10 px-4 text-sm font-semibold transition-all hover:bg-white/20"
+          onClick={onToggleTheme}
+          className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold transition hover:bg-white/20 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700"
         >
-          <span aria-hidden>🎲</span>
-          Kam dnes?
+          <ThemeIcon size={18} />
+          {themeLabel}
         </button>
       </header>
 
-      <div className="hidden gap-3 sm:flex">
-        {FILTER_OPTIONS.map((option) => {
-          const isActive = activeFilters.includes(option.key);
-          return (
-            <button
-              key={option.key}
-              type="button"
-              onClick={() => toggleFilter(option.key)}
-              className={[
-                "flex-1 rounded-2xl border border-white/10 px-4 py-3 text-sm font-semibold transition-all",
-                "bg-gradient-to-br",
-                option.accent,
-                isActive
-                  ? "shadow-lg shadow-black/30 ring-2 ring-white/20"
-                  : "opacity-60 hover:opacity-90",
-              ].join(" ")}
-            >
-              {option.label}
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="sm:hidden">
-        <button
-          type="button"
-          onClick={() => setOpenMobile((prev) => !prev)}
-          className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-semibold transition hover:bg-white/20"
-        >
-          <span>Filtrovat vrstvy</span>
-          <span className="text-xs uppercase tracking-wide text-white/70">
-            {openMobile ? "Zavřít" : "Otevřít"}
-          </span>
-        </button>
-        {openMobile ? (
-          <div className="mt-3 grid gap-2">
-            {FILTER_OPTIONS.map((option) => {
-              const isActive = activeFilters.includes(option.key);
-              return (
-                <label
-                  key={option.key}
-                  className="flex items-center justify-between rounded-2xl border border-white/10 bg-slate-800/70 px-4 py-3 text-xs uppercase tracking-wide"
-                >
-                  <span>{option.label}</span>
-                  <input
-                    type="checkbox"
-                    checked={isActive}
-                    onChange={() => toggleFilter(option.key)}
-                    className="h-4 w-4 rounded border-white/20 bg-white/10 accent-sky-400"
-                  />
-                </label>
-              );
-            })}
-          </div>
-        ) : null}
-      </div>
-
-      <footer className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-200 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="font-semibold">Pokročilé filtrování</p>
-          <p className="text-xs text-slate-300">
-            Připravte si vlastní vrstvy podle obtížnosti nebo okresu.
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="rounded-2xl border border-white/15 bg-white/10 p-4 shadow-inner shadow-white/5 dark:border-slate-700 dark:bg-slate-900/80">
+          <p className="text-xs uppercase tracking-wide text-white/70 dark:text-slate-400">
+            Aktivní lokality
+          </p>
+          <p className="mt-1 text-2xl font-bold text-white dark:text-emerald-200">
+            {visibleCount}
+          </p>
+          <p className="text-xs text-white/60 dark:text-slate-400">
+            z {totalCount} dostupných
           </p>
         </div>
-        {onReset ? (
-          <button
-            type="button"
-            onClick={onReset}
-            className="rounded-full border border-white/20 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white/80 transition hover:bg-white/20"
+        <div className="rounded-2xl border border-white/15 bg-white/10 p-4 shadow-inner shadow-white/5 dark:border-slate-700 dark:bg-slate-900/80">
+          <p className="text-xs uppercase tracking-wide text-white/70 dark:text-slate-400">
+            Zapnuté vrstvy
+          </p>
+          <p className="mt-1 text-2xl font-bold text-white dark:text-emerald-200">
+            {activeLayerCount}
+          </p>
+          <p className="text-xs text-white/60 dark:text-slate-400">
+            lze přepnout v legendě
+          </p>
+        </div>
+        <div className="rounded-2xl border border-white/15 bg-white/10 p-4 shadow-inner shadow-white/5 dark:border-slate-700 dark:bg-slate-900/80">
+          <p className="text-xs uppercase tracking-wide text-white/70 dark:text-slate-400">
+            Oblíbené tipy
+          </p>
+          <p className="mt-1 text-2xl font-bold text-white dark:text-emerald-200">
+            {favoritesCount}
+          </p>
+          <p className="text-xs text-white/60 dark:text-slate-400">
+            uložené v zařízení
+          </p>
+        </div>
+        <div className="rounded-2xl border border-white/15 bg-white/10 p-4 shadow-inner shadow-white/5 dark:border-slate-700 dark:bg-slate-900/80">
+          <p className="text-xs uppercase tracking-wide text-white/70 dark:text-slate-400">
+            Nejbližší zážitek
+          </p>
+          <p className="mt-1 text-sm font-semibold text-white/90 dark:text-emerald-100">
+            {nearestInfo ?? "Lokalizujte se pro doporučení"}
+          </p>
+        </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
+        <label className="flex flex-col gap-2">
+          <span className="text-xs uppercase tracking-wide text-white/70 dark:text-slate-400">
+            Okres
+          </span>
+          <select
+            value={selectedDistrict ?? ""}
+            onChange={(event) =>
+              onDistrictChange(event.target.value || null)
+            }
+            className="w-full rounded-2xl border border-white/15 bg-slate-950/40 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/40 dark:border-slate-700 dark:bg-slate-900"
           >
-            Obnovit výchozí
-          </button>
-        ) : null}
-      </footer>
-    </section>
+            <option value="">Všechny okresy</option>
+            {availableDistricts.map((district) => (
+              <option key={district} value={district}>
+                {district}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="flex flex-col gap-2">
+          <span className="text-xs uppercase tracking-wide text-white/70 dark:text-slate-400">
+            Turistický region
+          </span>
+          <select
+            value={selectedRegion ?? ""}
+            onChange={(event) => onRegionChange(event.target.value || null)}
+            className="w-full rounded-2xl border border-white/15 bg-slate-950/40 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/40 dark:border-slate-700 dark:bg-slate-900"
+          >
+            <option value="">Všechny regiony</option>
+            {availableRegions.map((region) => (
+              <option key={region} value={region}>
+                {region}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <button
+          type="button"
+          onClick={onClearFilters}
+          className="mt-6 inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-4 text-sm font-semibold text-white transition hover:bg-white/20 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700"
+        >
+          <RefreshCcw size={16} />
+          Vymazat
+        </button>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={onRandomTip}
+          className="inline-flex items-center gap-2 rounded-2xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-emerald-950 shadow-lg shadow-emerald-500/40 transition hover:bg-emerald-400"
+        >
+          <Sparkles size={16} />
+          🎲 Kam dnes?
+        </button>
+        <button
+          type="button"
+          onClick={onLocate}
+          className="inline-flex items-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700"
+        >
+          <LocateIcon size={16} />
+          {locating ? "Zjišťuji pozici…" : "Najít nejbližší tip"}
+        </button>
+      </div>
+    </motion.section>
   );
 }

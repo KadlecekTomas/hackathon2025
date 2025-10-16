@@ -1,0 +1,29 @@
+{
+  "type": "FeatureCollection",
+  "name": "SampleTuristickeRegiony",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "OBJECTID": 52001,
+        "NAZEV": "Krkonoše a Podkrkonoší",
+        "POPIS": "Horské oblasti s nejvyšší českou horou Sněžkou.",
+        "NAZEV_REGIONU": "Krkonoše a Podkrkonoší"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [15.484, 50.557],
+            [15.724, 50.722],
+            [15.976, 50.678],
+            [16.116, 50.596],
+            [15.974, 50.481],
+            [15.732, 50.458],
+            [15.484, 50.557]
+          ]
+        ]
+      }
+    }
+  ]
+}
