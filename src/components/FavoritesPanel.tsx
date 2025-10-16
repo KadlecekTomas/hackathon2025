@@ -49,7 +49,7 @@ export function FavoritesPanel({ favorites, onSelect, onRemove }: FavoritesPanel
                 <button
                   type="button"
                   onClick={() => onSelect(favorite)}
-                  className="inline-flex items-center gap-2 rounded-full border border-emerald-400 px-3 py-1 text-xs font-semibold text-emerald-600 transition hover:bg-emerald-400 hover:text-emerald-950"
+                  className="inline-flex items-center gap-2 rounded-full border border-emerald-400 px-3 py-1 text-xs font-semibold text-emerald-600 transition hover:bg-emerald-400 hover:text-emerald-950 cursor-pointer"
                 >
                   <MapPinned size={14} />
                   Zobrazit
@@ -57,7 +57,7 @@ export function FavoritesPanel({ favorites, onSelect, onRemove }: FavoritesPanel
                 <button
                   type="button"
                   onClick={() => onRemove(favorite)}
-                  className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-500 transition hover:border-red-400 hover:text-red-500"
+                  className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-500 transition hover:border-red-400 hover:text-red-500 cursor-pointer"
                 >
                   <Trash2 size={14} />
                   Odebrat
