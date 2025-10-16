@@ -150,21 +150,30 @@ function getPopupContent(
 
   return `
     <div class="space-y-2 khk-popup-content">
-      <div class="flex items-center gap-2 text-sm">
+      <button
+        type="button"
+        class="khk-popup-close"
+        data-action="close"
+        data-feature="${compoundId}"
+        aria-label="Zavrit"
+      >
+        &times;
+      </button>
+      <div class="flex items-center gap-2 text-sm text-slate-600">
         <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/20 text-xs font-semibold" style="color:${layer.color}">
           ${layerIconMarkup}
         </span>
-        <span class="text-xs uppercase tracking-wide text-white/70">${layer.title}</span>
+        <span class="text-xs uppercase tracking-wide text-slate-500">${layer.title}</span>
       </div>
-      <h3 class="font-semibold text-base text-white leading-tight">${title}</h3>
-      <p class="text-sm text-white/80 leading-relaxed">${description}</p>
+      <h3 class="font-semibold text-base text-slate-900 leading-tight">${title}</h3>
+      <p class="text-sm text-slate-600 leading-relaxed">${description}</p>
       <div class="grid gap-2">
         <button
           class="khk-popup-button"
           data-action="favorite"
           data-feature="${compoundId}"
         >
-          ⭐ Uložit
+          Ulozit
         </button>
         <button
           class="khk-popup-button khk-popup-button--secondary"
@@ -264,7 +273,7 @@ export function MapView({
     : null;
 
   return (
-    <div className="relative h-full w-full overflow-hidden rounded-3xl border border-white/20 shadow-xl dark:border-slate-700">
+    <div className="relative h-full w-full overflow-hidden rounded-3xl border border-white/20 dark:border-slate-700">
       <MapContainer
         center={DEFAULT_CENTER}
         zoom={DEFAULT_ZOOM}
@@ -379,24 +388,29 @@ export function MapView({
                 );
 
                 leafletLayer.on("popupopen", () => {
-                  const container = document.querySelector(
+                  const favoriteButton = document.querySelector(
                     `.khk-popup button[data-feature="${compoundId}"][data-action="favorite"]`,
                   ) as HTMLButtonElement | null;
                   const detailButton = document.querySelector(
                     `.khk-popup button[data-feature="${compoundId}"][data-action="detail"]`,
                   ) as HTMLButtonElement | null;
+                  const closeButton = document.querySelector(
+                    `.khk-popup button[data-feature="${compoundId}"][data-action="close"]`,
+                  ) as HTMLButtonElement | null;
 
-                  if (container) {
-                    container.textContent = isFavorite(layer.id, featureId)
-                      ? "⭐ Odebrat z oblíbených"
-                      : "⭐ Uložit";
-                    container.onclick = (event) => {
+                  if (favoriteButton) {
+                    favoriteButton.textContent = isFavorite(layer.id, featureId)
+                      ? "Odebrat z oblibenych"
+                      : "Ulozit";
+                    favoriteButton.onclick = (event) => {
                       event.stopPropagation();
                       onToggleFavorite(layer.id, typed);
                       setTimeout(() => {
-                        container.textContent = isFavorite(layer.id, featureId)
-                          ? "⭐ Odebrat z oblíbených"
-                          : "⭐ Uložit";
+                        if (favoriteButton) {
+                          favoriteButton.textContent = isFavorite(layer.id, featureId)
+                            ? "Odebrat z oblibenych"
+                            : "Ulozit";
+                        }
                       }, 150);
                     };
                   }
@@ -405,6 +419,13 @@ export function MapView({
                     detailButton.onclick = (event) => {
                       event.stopPropagation();
                       onSelectFeature(layer.id, typed);
+                    };
+                  }
+
+                  if (closeButton) {
+                    closeButton.onclick = (event) => {
+                      event.stopPropagation();
+                      leafletLayer.closePopup();
                     };
                   }
                 });
