@@ -1,0 +1,36 @@
+{
+  "type": "FeatureCollection",
+  "name": "SampleZidovskePamatky",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "OBJECTID": 50001,
+        "NAZEV": "Synagoga ve Dvoře Králové",
+        "POPIS": "Historická synagoga z 19. století, dnes kulturní centrum.",
+        "NAZEV_OKRESU": "Trutnov",
+        "NAZEV_REGIONU": "Kladské pomezí",
+        "WEB": "https://www.museum.cz/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [15.8135, 50.4318]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "OBJECTID": 50002,
+        "NAZEV": "Židovský hřbitov Hořice",
+        "POPIS": "Dochovaný židovský hřbitov s náhrobky od 18. století.",
+        "NAZEV_OKRESU": "Jičín",
+        "NAZEV_REGIONU": "Královéhradecko",
+        "WEB": "https://www.ckrumlov.cz/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [15.6322, 50.3627]
+      }
+    }
+  ]
+}

@@ -2,6 +2,7 @@ export type FavoriteFeature = {
   id: string;
   layerId: string;
   title: string;
+  layerTitle?: string;
   geometryType?: string;
   properties?: Record<string, unknown>;
 };
@@ -47,15 +48,18 @@ export function saveFavorites(favorites: FavoriteFeature[]): void {
 export function isFavorite(
   favorites: FavoriteFeature[],
   candidateId: string,
+  layerId?: string,
 ): boolean {
-  return favorites.some((item) => item.id === candidateId);
+  return favorites.some(
+    (item) => item.id === candidateId && (!layerId || item.layerId === layerId),
+  );
 }
 
 export function upsertFavorite(
   favorites: FavoriteFeature[],
   feature: FavoriteFeature,
 ): FavoriteFeature[] {
-  if (isFavorite(favorites, feature.id)) {
+  if (isFavorite(favorites, feature.id, feature.layerId)) {
     return favorites;
   }
   const nextFavorites = [...favorites, feature];
@@ -66,8 +70,11 @@ export function upsertFavorite(
 export function removeFavorite(
   favorites: FavoriteFeature[],
   featureId: string,
+  layerId?: string,
 ): FavoriteFeature[] {
-  const nextFavorites = favorites.filter((fav) => fav.id !== featureId);
+  const nextFavorites = favorites.filter(
+    (fav) => fav.id !== featureId || (layerId && fav.layerId !== layerId),
+  );
   saveFavorites(nextFavorites);
   return nextFavorites;
 }
@@ -76,8 +83,8 @@ export function toggleFavorite(
   favorites: FavoriteFeature[],
   feature: FavoriteFeature,
 ): FavoriteFeature[] {
-  if (isFavorite(favorites, feature.id)) {
-    return removeFavorite(favorites, feature.id);
+  if (isFavorite(favorites, feature.id, feature.layerId)) {
+    return removeFavorite(favorites, feature.id, feature.layerId);
   }
   return upsertFavorite(favorites, feature);
 }

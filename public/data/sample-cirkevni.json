@@ -1,0 +1,36 @@
+{
+  "type": "FeatureCollection",
+  "name": "SampleCirkevniPamatky",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "OBJECTID": 51001,
+        "NAZEV": "Katedrála Svatého Ducha",
+        "POPIS": "Dominanta Hradce Králové s vyhlídkovou věží.",
+        "NAZEV_OKRESU": "Hradec Králové",
+        "NAZEV_REGIONU": "Hradecko a Podorlicko",
+        "WEB": "https://www.katedralasvatehoducha.cz/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [15.8294, 50.2106]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "OBJECTID": 51002,
+        "NAZEV": "Barokní kaple Panny Marie",
+        "POPIS": "Barokní kaple zasazená do krajiny Orlických hor.",
+        "NAZEV_OKRESU": "Rychnov nad Kněžnou",
+        "NAZEV_REGIONU": "Orlické hory a Podorlicko",
+        "WEB": "https://www.orlickehory.cz/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [16.3051, 50.1578]
+      }
+    }
+  ]
+}
