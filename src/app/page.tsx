@@ -441,13 +441,7 @@ function PageInner() {
     aiSearchResults.length,
   ]);
 
-  const plannerFeatures = useMemo(
-    () =>
-      aiFeatures.filter((item) =>
-        activeLayerSet.has(item.layerId as GeoLayerId),
-      ),
-    [aiFeatures, activeLayerSet],
-  );
+  const plannerFeatures = useMemo(() => aiFeatures, [aiFeatures]);
 
   const isFavorite = useCallback(
     (layerId: GeoLayerId, featureId: string) =>
