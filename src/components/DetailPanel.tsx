@@ -317,7 +317,6 @@ export function DetailPanel({
           <h3 className="text-xs uppercase tracking-wide text-slate-500">
             Najdi města v okolí
           </h3>
-          <span className="text-xs text-slate-400">demo výpočet bez volání API</span>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <label className="flex-1 text-xs uppercase tracking-wide text-slate-500">
